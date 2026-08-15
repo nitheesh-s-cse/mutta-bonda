@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vijaykumar's Mutta Bonda Shop | Coimbatore's Signature Egg Bonda</title>
+<meta name="description" content="Vijaykumar's Mutta Bonda Shop, Thudiyalur, Coimbatore — home of the original Chicken Mutta Bonda. Order online, view the full menu, and book your evening tea stop.">
+<meta property="og:title" content="Vijaykumar's Mutta Bonda Shop">
+<meta property="og:description" content="Coimbatore's signature roadside egg bonda counter, since evening tea time began.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ PRELOADER ============ -->
+<div class="preloader" id="preloader">
+  <svg class="preloader__mark" viewBox="0 0 120 120" width="72" height="72">
+    <circle cx="60" cy="60" r="46" fill="none" stroke="var(--ember)" stroke-width="3" stroke-dasharray="289" stroke-dashoffset="289">
+      <animate attributeName="stroke-dashoffset" from="289" to="0" dur="1.1s" fill="freeze" />
+    </circle>
+    <circle cx="60" cy="60" r="30" fill="var(--charcoal-2)" stroke="var(--gold)" stroke-width="1.5"/>
+    <text x="60" y="68" text-anchor="middle" font-family="Fraunces" font-size="26" fill="var(--gold)">VB</text>
+  </svg>
+  <p class="preloader__label">Ready by the pan&nbsp;&mdash;&nbsp;plating your table</p>
+</div>
+
+<!-- ============ CURSOR GLOW ============ -->
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="siteNav">
+  <div class="nav__inner">
+    <a href="#home" class="brand">
+      <span class="brand__mark" aria-hidden="true">
+        <img src="assets/image1.png" alt="Vijaykumar's Mutta Bonda Shop logo" class="brand__logo">
+      </span>
+      <span class="brand__text">Vijaykumar's<em>Mutta Bonda Shop</em></span>
+    </a>
+
+    <nav class="nav__links" id="navLinks">
+      <a href="#menu">Menu</a>
+      <a href="#special">Today's Special</a>
+      <a href="#combos">Offers</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#feedback">Feedback</a>
+      <a href="#contact">Visit Us</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a href="tel:+918610713970" class="nav__icon-btn" aria-label="Call the shop" title="Call">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </a>
+      <button class="cart-btn" id="cartToggle" aria-label="Open cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-btn__count" id="cartCount">0</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="hero__embers" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <div class="hero__steam" aria-hidden="true">
+    <svg viewBox="0 0 200 400" preserveAspectRatio="none"><path class="steam-path" d="M40 400 C 10 340, 70 300, 40 240 C 10 180, 70 140, 40 80 C 20 40, 60 20, 50 0" fill="none" stroke="var(--smoke)" stroke-width="10" stroke-linecap="round"/></svg>
+  </div>
+
+  <div class="hero__inner">
+    <p class="eyebrow reveal">Thudiyalur &middot; Coimbatore &middot; Since evening tea began</p>
+    <h1 class="hero__title reveal">
+      <span class="line">The Original</span>
+      <span class="line hero__title--accent">Chicken Mutta Bonda</span>
+      <span class="line">Counter</span>
+    </h1>
+    <p class="hero__sub reveal">Hand-rolled at the pan, dropped in hot oil to order, handed to you steaming &mdash; the way roadside evenings are supposed to taste.</p>
+
+    <div class="hero__actions reveal">
+      <button class="btn btn--primary" onclick="document.getElementById('menu').scrollIntoView({behavior:'smooth'})">View Full Menu</button>
+      <a class="btn btn--ghost" href="https://wa.me/918610713970?text=Vanakkam!%20I'd%20like%20to%20order%20from%20Vijaykumar's%20Mutta%20Bonda%20Shop." target="_blank" rel="noopener">Order on WhatsApp</a>
+      <a class="btn btn--text" href="tel:+918610713970">Call Now &rarr;</a>
+    </div>
+
+    <div class="hero__ticket reveal" id="specialTicket">
+      <img src="assets/images/image2.png" alt="Chicken Mutta Bonda" class="hero__ticket-img" loading="lazy">
+      <div class="hero__ticket-body">
+        <span class="tag tag--gold">Today's Special</span>
+        <h3>Chicken Mutta Bonda</h3>
+        <p class="price">&#8377;60</p>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============ TODAY'S SPECIAL ============ -->
+<section class="special" id="special">
+  <div class="section-head reveal">
+    <p class="eyebrow">The One Everyone Orders</p>
+    <h2>Today's Special</h2>
+  </div>
+
+  <div class="special__card reveal">
+    <div class="special__media">
+      <img src="assets/images/image3.png" alt="Chicken Mutta Bonda served hot" loading="lazy">
+      <div class="badge-stack">
+        <span class="badge">Best Seller</span>
+        <span class="badge">Chef Special</span>
+        <span class="badge">Most Ordered</span>
+      </div>
+    </div>
+    <div class="special__body">
+      <h3>Chicken Mutta Bonda</h3>
+      <p>Minced chicken and egg folded into our signature bonda batter, fried fresh per order and served with ginger chutney and a hot glass of chai on the side.</p>
+      <div class="special__meta">
+        <div><span>Price</span><strong>&#8377;60</strong></div>
+        <div><span>Prep Time</span><strong>4&ndash;5 min</strong></div>
+        <div><span>Stock</span><strong class="low-stock">Limited today</strong></div>
+      </div>
+      <button class="btn btn--primary" data-add-cart data-name="Chicken Mutta Bonda" data-price="60" data-category="Special Bonda">Add to Cart</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MENU ============ -->
+<section class="menu" id="menu">
+  <div class="section-head reveal">
+    <p class="eyebrow">Full Menu</p>
+    <h2>What's Cooking Today</h2>
+  </div>
+
+  <div class="menu__controls reveal">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="menuSearch" placeholder="Search the menu&hellip; e.g. paneer, ginger tea">
+    </div>
+    <div class="filter-chips" id="filterChips">
+      <button class="chip is-active" data-filter="all">All</button>
+      <button class="chip" data-filter="Special Bonda">Special</button>
+      <button class="chip" data-filter="Veg Bonda">Veg Bonda</button>
+      <button class="chip" data-filter="Non-Veg Bonda">Non-Veg Bonda</button>
+      <button class="chip" data-filter="Tea">Tea</button>
+      <button class="chip" data-filter="Coffee">Coffee</button>
+      <button class="chip" data-filter="Juices">Juices</button>
+    </div>
+  </div>
+
+  <div class="menu__grid" id="menuGrid"><!-- populated by js/main.js from MENU_DATA --></div>
+  <p class="menu__empty" id="menuEmpty" hidden>Nothing matches that search &mdash; try a different word.</p>
+</section>
+
+<!-- ============ COMBOS ============ -->
+<section class="combos" id="combos">
+  <div class="section-head reveal">
+    <p class="eyebrow">Worth The Extra Order</p>
+    <h2>Combo Offers</h2>
+  </div>
+
+  <div class="combos__grid">
+    <div class="combo-card reveal">
+      <span class="combo-card__ribbon">Free Tea Included</span>
+      <img src="https://picsum.photos/seed/combo-kaara/500/340" alt="Kaara Bonda and Chicken Mutta Bonda combo" loading="lazy">
+      <div class="combo-card__body">
+        <h3>Kaara Bonda + Chicken Mutta Bonda</h3>
+        <p>One of each signature bonda, paired with a hot cup of tea.</p>
+        <div class="combo-card__foot">
+          <strong class="price">&#8377;80</strong>
+          <button class="btn btn--primary btn--sm" data-add-cart data-name="Combo: Kaara + Mutta Bonda (Free Tea)" data-price="80" data-category="Combo">Add Combo</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="combo-card reveal">
+      <span class="combo-card__ribbon">Family Favourite</span>
+      <img src="https://picsum.photos/seed/combo-family/500/340" alt="Family bonda combo pack" loading="lazy">
+      <div class="combo-card__body">
+        <h3>Family Bonda Combo</h3>
+        <p>Our full family pack with a complimentary Coke and cupcake.</p>
+        <div class="combo-card__foot">
+          <strong class="price">&#8377;200</strong>
+          <button class="btn btn--primary btn--sm" data-add-cart data-name="Family Bonda Combo (Free Coke + Cupcake)" data-price="200" data-category="Combo">Add Combo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery" id="gallery">
+  <div class="section-head reveal">
+    <p class="eyebrow">From the Counter</p>
+    <h2>Gallery</h2>
+  </div>
+  <div class="gallery__grid" id="galleryGrid">
+    <!-- images populated by main.js -->
+  </div>
+</section>
+
+<!-- ============ REVIEWS ============ -->
+<section class="reviews" id="reviews">
+  <div class="section-head reveal">
+    <p class="eyebrow">What Regulars Say</p>
+    <h2>Customer Reviews</h2>
+  </div>
+
+  <div class="reviews__track" id="reviewsTrack">
+    <!-- populated by main.js -->
+  </div>
+  <div class="reviews__dots" id="reviewsDots"></div>
+</section>
+
+<!-- ============ FEEDBACK ============ -->
+<section class="feedback" id="feedback">
+  <div class="section-head reveal">
+    <p class="eyebrow">Tell Us Honestly</p>
+    <h2>Share Your Feedback</h2>
+  </div>
+
+  <form class="feedback-form reveal" id="feedbackForm" autocomplete="off">
+    <div class="form-grid">
+      <label>Name<input type="text" name="name" required placeholder="Your name"></label>
+      <label>Phone Number<input type="tel" name="phone" required placeholder="10-digit number" pattern="[0-9]{10}"></label>
+      <label>Email<input type="email" name="email" placeholder="you@example.com"></label>
+      <label>Visit Date<input type="date" name="visitDate"></label>
+      <label>Favourite Item<input type="text" name="favouriteItem" placeholder="e.g. Chicken Mutta Bonda"></label>
+      <label>Food Quality
+        <select name="foodQuality">
+          <option>Excellent</option><option>Good</option><option>Average</option><option>Poor</option><option>Very Poor</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="rating-grid">
+      <div class="rating-row" data-rating="overall"><span>Overall Rating</span><div class="stars" data-field="overall"></div></div>
+      <div class="rating-row" data-rating="taste"><span>Taste</span><div class="stars" data-field="taste"></div></div>
+      <div class="rating-row" data-rating="price"><span>Price Satisfaction</span><div class="stars" data-field="price"></div></div>
+      <div class="rating-row" data-rating="staff"><span>Staff Behaviour</span><div class="stars" data-field="staff"></div></div>
+      <div class="rating-row" data-rating="cleanliness"><span>Cleanliness</span><div class="stars" data-field="cleanliness"></div></div>
+    </div>
+
+    <div class="form-grid form-grid--3">
+      <label>Would You Visit Again?
+        <select name="visitAgain"><option>Yes</option><option>Maybe</option><option>No</option></select>
+      </label>
+      <label>Recommend to Friends?
+        <select name="recommend"><option>Yes</option><option>Maybe</option><option>No</option></select>
+      </label>
+      <label class="file-label">Upload a Food Photo
+        <input type="file" name="photo" accept="image/*">
+      </label>
+    </div>
+
+    <label class="full">Suggestions<textarea name="suggestions" rows="3" placeholder="Anything we should improve?"></textarea></label>
+
+    <button type="submit" class="btn btn--primary">Submit Feedback</button>
+    <p class="form-success" id="feedbackSuccess" hidden>Thank you &mdash; your feedback has been recorded.</p>
+  </form>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact" id="contact">
+  <div class="contact__grid">
+    <div class="contact__info reveal">
+      <p class="eyebrow">Visit Us</p>
+      <h2>Find the Counter</h2>
+      <ul class="contact__list">
+        <li><strong>Phone</strong><a href="tel:+918610713970">+91 861 071 3970</a></li>
+        <li><strong>Email</strong><a href="mailto:vijaykumar07@gmail.com">vijaykumar07@gmail.com</a></li>
+        <li><strong>Location</strong><span>Near Thudiyalur, Coimbatore, Tamil Nadu</span></li>
+        <li><strong>Hours</strong><span>4:00 PM &ndash; 10:30 PM, all days</span></li>
+      </ul>
+      <a class="btn btn--ghost" href="https://wa.me/918610713970" target="_blank" rel="noopener">Message on WhatsApp</a>
+    </div>
+
+    <div class="contact__map reveal">
+      <iframe title="Vijaykumar's Mutta Bonda Shop location" src="https://www.google.com/maps?q=Thudiyalur,Coimbatore,Tamil+Nadu&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <form class="contact__form reveal" id="contactForm" autocomplete="off">
+      <h3>Send a Message</h3>
+      <label>Name<input type="text" name="name" required></label>
+      <label>Phone<input type="tel" name="phone" required></label>
+      <label>Message<textarea name="message" rows="3" required></textarea></label>
+      <button type="submit" class="btn btn--primary btn--sm">Send</button>
+      <p class="form-success" id="contactSuccess" hidden>Message sent &mdash; we'll get back to you shortly.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer__inner">
+    <a href="#home" class="brand brand--footer">
+      <svg viewBox="0 0 48 48" width="30" height="30"><circle cx="24" cy="24" r="22" fill="var(--charcoal-3)" stroke="var(--gold)" stroke-width="1.5"/><ellipse cx="24" cy="27" rx="13" ry="10" fill="var(--ember)"/><circle cx="24" cy="24" r="5" fill="var(--gold-light)"/></svg>
+      <span>Vijaykumar's Mutta Bonda Shop</span>
+    </a>
+    <p>&copy; <span id="year"></span> Vijaykumar's Mutta Bonda Shop, Thudiyalur, Coimbatore. All rights reserved.</p>
+    <div class="footer__links">
+      <a href="#menu">Menu</a><a href="#feedback">Feedback</a><a href="#contact">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ CART DRAWER ============ -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer__head">
+    <h3>Your Order</h3>
+    <button id="cartClose" aria-label="Close cart">&times;</button>
+  </div>
+  <div class="cart-drawer__items" id="cartItems"></div>
+  <div class="cart-drawer__summary">
+    <div class="row"><span>Subtotal</span><strong id="cartSubtotal">&#8377;0</strong></div>
+    <div class="row"><span>Delivery</span><strong id="cartDelivery">&#8377;0</strong></div>
+    <div class="row row--coupon">
+      <input type="text" id="couponInput" placeholder="Coupon code (try BONDA10)">
+      <button id="applyCoupon" class="btn btn--text">Apply</button>
+    </div>
+    <div class="row" id="discountRow" hidden><span>Discount</span><strong id="cartDiscount">&#8377;0</strong></div>
+    <div class="row row--total"><span>Grand Total</span><strong id="cartTotal">&#8377;0</strong></div>
+  </div>
+  <button class="btn btn--primary btn--full" id="checkoutBtn">Checkout on WhatsApp</button>
+</aside>
+
+<!-- Set this to your deployed backend URL (e.g. https://mutta-bonda-shop-api.onrender.com/api) -->
+<script>window.API_BASE = window.API_BASE || "http://localhost:5000/api";</script>
+<script src="js/main.js"></script>
+</body>
+</html>
