@@ -1,4 +1,4 @@
-/* Run with: npm run seed
+/* Run with: npm run seed or called automatically on server startup.
    Populates Supabase database with the starting menu and one admin account. */
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
@@ -34,51 +34,50 @@ const menu = [
   { name: "Family Bonda Combo (Free Coke + Cupcake)", price: 200, category: "Combo" },
 ];
 
-async function seed() {
-  console.log("Seeding Supabase...");
+async function autoSeed() {
+  try {
+    const email = (process.env.ADMIN_EMAIL || "owner@example.com").toLowerCase();
+    const password = process.env.ADMIN_PASSWORD || "changeme123";
 
-  // Delete existing items
-  const { error: delErr } = await supabase.from("menu_items").delete().neq("id", 0);
-  if (delErr) console.warn("Notice during menu clear:", delErr.message);
-
-  // Insert menu
-  const { data: insertedMenu, error: menuErr } = await supabase
-    .from("menu_items")
-    .insert(menu)
-    .select();
-
-  if (menuErr) throw menuErr;
-  console.log(`Inserted ${insertedMenu.length} menu items.`);
-
-  const email = (process.env.ADMIN_EMAIL || "owner@example.com").toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || "changeme123";
-
-  // Check if admin exists
-  const { data: existingAdmin, error: adminQueryErr } = await supabase
-    .from("admin_users")
-    .select("*")
-    .eq("email", email);
-
-  if (adminQueryErr) throw adminQueryErr;
-
-  if (!existingAdmin || existingAdmin.length === 0) {
-    const password_hash = await bcrypt.hash(password, 10);
-    const { error: adminInsertErr } = await supabase
+    // Check if admin users table has admin
+    const { data: existingAdmin, error: adminQueryErr } = await supabase
       .from("admin_users")
-      .insert([{ email, password_hash }]);
+      .select("*")
+      .eq("email", email);
 
-    if (adminInsertErr) throw adminInsertErr;
-    console.log(`Created admin account for ${email}.`);
-  } else {
-    console.log("Admin account already exists — skipped.");
+    if (adminQueryErr) {
+      console.warn("Auto-seed notice:", adminQueryErr.message);
+      return;
+    }
+
+    if (!existingAdmin || existingAdmin.length === 0) {
+      console.log("No admin found. Auto-seeding initial database data...");
+      const password_hash = await bcrypt.hash(password, 10);
+      const { error: adminInsertErr } = await supabase
+        .from("admin_users")
+        .insert([{ email, password_hash }]);
+
+      if (!adminInsertErr) {
+        console.log(`Created default admin account for ${email}`);
+      }
+
+      const { data: existingMenu } = await supabase.from("menu_items").select("id").limit(1);
+      if (!existingMenu || existingMenu.length === 0) {
+        const { data: insertedMenu } = await supabase.from("menu_items").insert(menu).select();
+        if (insertedMenu) {
+          console.log(`Inserted ${insertedMenu.length} initial menu items.`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Auto-seed failed:", err.message);
   }
-
-  console.log("Seeding complete.");
-  process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error("Seeding failed:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  autoSeed().then(() => process.exit(0));
+}
+
+module.exports = { autoSeed };
+
 
