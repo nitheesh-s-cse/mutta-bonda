@@ -1,12 +1,11 @@
 /* Run with: npm run seed
-   Populates the database with the starting menu and one admin account. */
+   Populates Supabase database with the starting menu and one admin account. */
 require("dotenv").config();
-const connectDB = require("./config/db");
-const MenuItem = require("./models/MenuItem");
-const Admin = require("./models/Admin");
+const bcrypt = require("bcryptjs");
+const supabase = require("./config/supabase");
 
 const menu = [
-  { name: "Chicken Mutta Bonda", price: 60, category: "Special Bonda", isTodaysSpecial: true, badges: ["Best Seller", "Chef Special", "Most Ordered"] },
+  { name: "Chicken Mutta Bonda", price: 60, category: "Special Bonda", is_todays_special: true, tag: "Best Seller" },
   { name: "Kaara Bonda", price: 20, category: "Veg Bonda" },
   { name: "Keerai Bonda", price: 20, category: "Veg Bonda" },
   { name: "Murunga Keerai Bonda", price: 25, category: "Veg Bonda" },
@@ -36,21 +35,40 @@ const menu = [
 ];
 
 async function seed() {
-  await connectDB();
+  console.log("Seeding Supabase...");
 
-  await MenuItem.deleteMany({});
-  await MenuItem.insertMany(menu);
-  console.log(`Inserted ${menu.length} menu items.`);
+  // Delete existing items
+  const { error: delErr } = await supabase.from("menu_items").delete().neq("id", 0);
+  if (delErr) console.warn("Notice during menu clear:", delErr.message);
+
+  // Insert menu
+  const { data: insertedMenu, error: menuErr } = await supabase
+    .from("menu_items")
+    .insert(menu)
+    .select();
+
+  if (menuErr) throw menuErr;
+  console.log(`Inserted ${insertedMenu.length} menu items.`);
 
   const email = (process.env.ADMIN_EMAIL || "owner@example.com").toLowerCase();
-  const existingAdmin = await Admin.findOne({ email });
-  if (!existingAdmin) {
-    await Admin.create({
-      email,
-      password: process.env.ADMIN_PASSWORD || "changeme123",
-      name: "Vijaykumar",
-    });
-    console.log(`Created admin account for ${email}. Change this password after first login.`);
+  const password = process.env.ADMIN_PASSWORD || "changeme123";
+
+  // Check if admin exists
+  const { data: existingAdmin, error: adminQueryErr } = await supabase
+    .from("admin_users")
+    .select("*")
+    .eq("email", email);
+
+  if (adminQueryErr) throw adminQueryErr;
+
+  if (!existingAdmin || existingAdmin.length === 0) {
+    const password_hash = await bcrypt.hash(password, 10);
+    const { error: adminInsertErr } = await supabase
+      .from("admin_users")
+      .insert([{ email, password_hash }]);
+
+    if (adminInsertErr) throw adminInsertErr;
+    console.log(`Created admin account for ${email}.`);
   } else {
     console.log("Admin account already exists — skipped.");
   }
@@ -63,3 +81,4 @@ seed().catch((err) => {
   console.error("Seeding failed:", err);
   process.exit(1);
 });
+

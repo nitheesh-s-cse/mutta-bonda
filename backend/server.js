@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const menuRoutes = require("./routes/menuRoutes");
@@ -33,6 +32,5 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Mutta Bonda Shop API running on port ${PORT}`));
-});
+app.listen(PORT, () => console.log(`Mutta Bonda Shop API running on port ${PORT}`));
+
