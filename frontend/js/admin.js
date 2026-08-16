@@ -1,4 +1,5 @@
-let API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "http://localhost:5000/api";
+let API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "https://mutta-bonda.onrender.com/api";
+
 const TOKEN_KEY = "vb_admin_token";
 
 const loginView = document.getElementById("loginView");
