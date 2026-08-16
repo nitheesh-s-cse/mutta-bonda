@@ -36,8 +36,8 @@ const menu = [
 
 async function autoSeed() {
   try {
-    const email = (process.env.ADMIN_EMAIL || "owner@example.com").toLowerCase();
-    const password = process.env.ADMIN_PASSWORD || "changeme123";
+    const email = (process.env.ADMIN_EMAIL || "nitheeshsmart4316@gmail.com").toLowerCase();
+    const password = process.env.ADMIN_PASSWORD || "sollamaaten";
 
     // Check if admin users table has admin
     const { data: existingAdmin, error: adminQueryErr } = await supabase

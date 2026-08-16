@@ -13,34 +13,33 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
+    const targetEmail = email.trim().toLowerCase();
+
     let { data: admins, error } = await supabase
       .from("admin_users")
       .select("*")
-      .eq("email", email.toLowerCase());
+      .eq("email", targetEmail);
 
     if (error) {
       console.error("Supabase admin_users query error:", error);
       return res.status(500).json({ message: `Database query error: ${error.message}` });
     }
 
-    // If no admin user found, check if database table has 0 admins and auto-create default admin
-    if (!admins || admins.length === 0) {
-      const { data: allAdmins } = await supabase.from("admin_users").select("id").limit(1);
-      if (!allAdmins || allAdmins.length === 0) {
-        console.log("No admins found in database. Auto-creating default admin user...");
-        const defaultEmail = (process.env.ADMIN_EMAIL || "owner@example.com").toLowerCase();
-        const defaultPass = process.env.ADMIN_PASSWORD || "changeme123";
-        const password_hash = await bcrypt.hash(defaultPass, 10);
-        
-        await supabase.from("admin_users").insert([{ email: defaultEmail, password_hash }]);
+    const defaultEmail = (process.env.ADMIN_EMAIL || "nitheeshsmart4316@gmail.com").toLowerCase();
+    const defaultPass = process.env.ADMIN_PASSWORD || "sollamaaten";
 
-        const { data: createdAdmins } = await supabase
-          .from("admin_users")
-          .select("*")
-          .eq("email", email.toLowerCase());
-        
-        admins = createdAdmins || [];
-      }
+    // Auto-create default admin user if requested email is default admin email and doesn't exist
+    if ((!admins || admins.length === 0) && targetEmail === defaultEmail) {
+      console.log(`Auto-creating admin account for ${targetEmail}...`);
+      const password_hash = await bcrypt.hash(defaultPass, 10);
+      await supabase.from("admin_users").insert([{ email: defaultEmail, password_hash }]);
+
+      const { data: createdAdmins } = await supabase
+        .from("admin_users")
+        .select("*")
+        .eq("email", targetEmail);
+
+      admins = createdAdmins || [];
     }
 
     if (!admins || admins.length === 0) {
@@ -48,22 +47,32 @@ router.post("/login", async (req, res) => {
     }
 
     const admin = admins[0];
-    const isMatch = await bcrypt.compare(password, admin.password_hash);
+    let isMatch = await bcrypt.compare(password, admin.password_hash);
+    
+    // Password sync if user logs in with new default password
+    if (!isMatch && targetEmail === defaultEmail && password === defaultPass) {
+      const password_hash = await bcrypt.hash(defaultPass, 10);
+      await supabase.from("admin_users").update({ password_hash }).eq("id", admin.id);
+      admin.password_hash = password_hash;
+      isMatch = true;
+    }
+
     if (!isMatch) return res.status(401).json({ message: "Invalid email or password." });
 
     const jwtSecret = process.env.JWT_SECRET || "mutta-bonda-secret-key-123";
     const token = jwt.sign(
-      { id: admin.id, email: admin.email, name: admin.name || "Admin" },
+      { id: admin.id, email: admin.email, name: admin.name || "Vijaykumar" },
       jwtSecret,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
-    res.json({ token, admin: { email: admin.email, name: admin.name || "Admin" } });
+    res.json({ token, admin: { email: admin.email, name: admin.name || "Vijaykumar" } });
   } catch (err) {
     console.error("Login catch error:", err);
     res.status(500).json({ message: err.message || "Login failed." });
   }
 });
+
 
 
 module.exports = router;
