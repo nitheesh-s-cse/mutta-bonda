@@ -3,7 +3,8 @@
    Sections: data, cart, menu render, forms, animations
    Backend base URL — point this at your deployed API.
    ========================================================= */
-const API_BASE = window.API_BASE || "http://localhost:5000/api";
+const API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "http://localhost:5000/api";
+
 
 /* ---------------- MENU DATA ---------------- */
 const MENU_DATA = [
