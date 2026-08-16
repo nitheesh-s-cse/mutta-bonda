@@ -222,22 +222,30 @@ async function loadMenu() {
 
     document.getElementById("menuBody").innerHTML = loadedMenuItems
       .map(
-        (item) => `
+        (item) => {
+          const isAvail = item.is_available !== false && item.is_available !== "false" && item.isAvailable !== false && item.isAvailable !== "false";
+          const itemId = item.id || item._id;
+          return `
       <tr>
-        <td><img src="${getItemImg(item)}" alt="${item.name}" style="width:38px;height:38px;border-radius:6px;object-fit:cover;background:var(--charcoal-3);" onerror="this.src='assets/images/chicken_mutta_bonda.jpg'"></td>
+        <td><img src="${getItemImg(item)}" alt="${item.name}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;background:var(--charcoal-3);" onerror="this.src='assets/images/chicken_mutta_bonda.jpg'"></td>
         <td><strong>${item.name}</strong></td>
         <td>${item.category}</td>
         <td>₹${item.price}</td>
         <td>
-          <input type="number" class="order-input" data-order-id="${item.id || item._id}" value="${item.display_order ?? item.sort_order ?? 0}" style="width:54px;padding:0.25rem 0.4rem;font-size:0.8rem;background:var(--charcoal-3);border:1px solid rgba(200,151,63,.25);color:var(--cream);border-radius:4px;" title="Change display order">
+          <input type="number" class="order-input" data-order-id="${itemId}" value="${item.display_order ?? item.sort_order ?? 0}" style="width:54px;padding:0.25rem 0.4rem;font-size:0.8rem;background:var(--charcoal-3);border:1px solid rgba(200,151,63,.25);color:var(--cream);border-radius:4px;" title="Change display order">
         </td>
-        <td><span class="status-pill">${item.is_available !== false && item.isAvailable !== false ? "Available" : "Disabled"}</span></td>
+        <td>
+          <span class="status-pill ${isAvail ? 'status-pill--active' : 'status-pill--disabled'}">
+            ${isAvail ? '🟢 Available' : '🔴 Disabled'}
+          </span>
+        </td>
         <td style="white-space:nowrap;">
-          <button class="btn btn--text btn--sm" data-edit="${item.id || item._id}">Edit</button>
-          <button class="btn btn--text btn--sm" data-toggle="${item.id || item._id}" data-state="${item.is_available !== false && item.isAvailable !== false}">Toggle</button>
-          <button class="btn btn--text btn--sm" data-delete="${item.id || item._id}" style="color:var(--danger)">Delete</button>
+          <button class="btn btn--text btn--sm" data-edit="${itemId}">Edit</button>
+          <button class="btn btn--text btn--sm" data-toggle="${itemId}">Toggle Status</button>
+          <button class="btn btn--text btn--sm" data-delete="${itemId}" style="color:var(--danger)">Delete</button>
         </td>
-      </tr>`
+      </tr>`;
+        }
       )
       .join("");
 
@@ -263,7 +271,9 @@ async function loadMenu() {
         document.getElementById("editName").value = item.name || "";
         document.getElementById("editPrice").value = item.price || 0;
         document.getElementById("editCategory").value = item.category || "Special Bonda";
-        document.getElementById("editImageUrl").value = item.image_url || item.image || "";
+        const imgVal = item.image_url || item.image || "assets/images/chicken_mutta_bonda.jpg";
+        document.getElementById("editImageUrl").value = imgVal;
+        document.getElementById("editImgPreview").src = imgVal;
         document.getElementById("editDisplayOrder").value = item.display_order ?? item.sort_order ?? 0;
         
         const modal = document.getElementById("editModal");
@@ -273,13 +283,32 @@ async function loadMenu() {
 
     document.querySelectorAll("[data-toggle]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const newState = btn.dataset.state !== "true";
-        await fetch(`${API_BASE}/menu/${btn.dataset.toggle}`, {
-          method: "PUT",
-          headers: authHeaders(),
-          body: JSON.stringify({ is_available: newState, isAvailable: newState }),
-        });
-        loadMenu();
+        const id = btn.dataset.toggle;
+        const item = loadedMenuItems.find((i) => (i.id || i._id) == id);
+        const currentAvail = item ? (item.is_available !== false && item.is_available !== "false" && item.isAvailable !== false && item.isAvailable !== "false") : true;
+        const nextAvail = !currentAvail;
+
+        btn.disabled = true;
+        btn.textContent = "Updating...";
+
+        try {
+          const res = await fetch(`${API_BASE}/menu/${id}`, {
+            method: "PUT",
+            headers: authHeaders(),
+            body: JSON.stringify({ is_available: nextAvail, isAvailable: nextAvail }),
+          });
+          if (res.ok) {
+            await loadMenu();
+          } else {
+            alert("Could not update item status.");
+            btn.disabled = false;
+            btn.textContent = "Toggle Status";
+          }
+        } catch (e) {
+          alert(`Toggle error: ${e.message}`);
+          btn.disabled = false;
+          btn.textContent = "Toggle Status";
+        }
       });
     });
 
@@ -294,6 +323,47 @@ async function loadMenu() {
     console.error("Load menu error:", err);
   }
 }
+
+/* ---------------- IMAGE PICKER & FILE UPLOAD HANDLERS ---------------- */
+function bindImagePickers(gallerySelectId, fileInputId, textInputId, previewImgId) {
+  const gallerySel = document.getElementById(gallerySelectId);
+  const fileInp = document.getElementById(fileInputId);
+  const textInp = document.getElementById(textInputId);
+  const prevImg = document.getElementById(previewImgId);
+
+  if (gallerySel && textInp && prevImg) {
+    gallerySel.addEventListener("change", () => {
+      if (gallerySel.value) {
+        textInp.value = gallerySel.value;
+        prevImg.src = gallerySel.value;
+      }
+    });
+  }
+
+  if (fileInp && textInp && prevImg) {
+    fileInp.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        textInp.value = event.target.result;
+        prevImg.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (textInp && prevImg) {
+    textInp.addEventListener("input", () => {
+      if (textInp.value.trim()) {
+        prevImg.src = textInp.value.trim();
+      }
+    });
+  }
+}
+
+bindImagePickers("addGallerySelect", "addFileInput", "addImageUrlInput", "addImgPreview");
+bindImagePickers("editGallerySelect", "editFileInput", "editImageUrl", "editImgPreview");
 
 document.getElementById("closeEditModalBtn")?.addEventListener("click", () => {
   const modal = document.getElementById("editModal");

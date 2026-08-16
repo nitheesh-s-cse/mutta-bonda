@@ -16,11 +16,14 @@
   table{width:100%;border-collapse:collapse;font-size:.85rem;}
   th,td{text-align:left;padding:.6rem .5rem;border-bottom:1px solid rgba(200,151,63,.12);}
   th{color:var(--gold-light);font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;}
-  select{padding:.3rem .5rem;font-size:.78rem;}
+  select, input[type="text"], input[type="number"], input[type="file"]{padding:.4rem .6rem;font-size:.82rem;background:var(--charcoal-3);border:1px solid rgba(200,151,63,.25);color:var(--cream);border-radius:6px;}
   #loginView{max-width:380px;margin:4rem auto;}
   #dashView{display:none;}
   .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6rem;}
-  .status-pill{padding:.2rem .6rem;border-radius:100px;font-size:.7rem;font-family:var(--font-mono);border:1px solid var(--gold);}
+  .status-pill{padding:.25rem .65rem;border-radius:100px;font-size:.72rem;font-family:var(--font-mono);font-weight:600;display:inline-block;}
+  .status-pill--active{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.4);}
+  .status-pill--disabled{background:rgba(224,72,60,.15);color:#e0483c;border:1px solid rgba(224,72,60,.4);}
+  .img-picker-box{display:flex;flex-direction:column;gap:0.4rem;background:rgba(0,0,0,0.2);padding:0.6rem;border-radius:8px;border:1px dashed rgba(200,151,63,.25);}
 </style>
 </head>
 <body>
@@ -59,7 +62,7 @@
 
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Add Menu Item</h3>
-    <form id="menuForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;align-items:end;">
+    <form id="menuForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;align-items:end;">
       <label>Name<input type="text" name="name" required placeholder="e.g. Special Bonda"></label>
       <label>Price (₹)<input type="number" name="price" required min="0" placeholder="e.g. 30"></label>
       <label>Category
@@ -68,9 +71,44 @@
           <option>Tea</option><option>Coffee</option><option>Juices</option><option>Combo</option>
         </select>
       </label>
-      <label>Image URL<input type="text" name="image_url" placeholder="e.g. assets/images/kaara_bonda.jpg"></label>
-      <label>Display Order<input type="number" name="display_order" value="0" min="0" placeholder="0"></label>
-      <button class="btn btn--primary btn--sm" type="submit">Add Item</button>
+      <label>Display Order (Priority)<input type="number" name="display_order" value="0" min="0" placeholder="0"></label>
+      
+      <div class="img-picker-box" style="grid-column:1/-1;">
+        <span style="font-size:0.8rem;color:var(--gold-light);font-weight:600;">Item Image Options</span>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.8rem;align-items:center;">
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Pick from Gallery
+            <select id="addGallerySelect">
+              <option value="">-- Choose Gallery Preset --</option>
+              <option value="assets/images/chicken_mutta_bonda.jpg">Chicken Mutta Bonda</option>
+              <option value="assets/images/kaara_bonda.jpg">Kaara Bonda</option>
+              <option value="assets/images/keerai_bonda.jpg">Keerai Bonda</option>
+              <option value="assets/images/paneer_bonda.jpg">Paneer Bonda</option>
+              <option value="assets/images/cheese_bonda.jpg">Cheese Bonda</option>
+              <option value="assets/images/mutton_bonda.jpg">Mutton / Beef Bonda</option>
+              <option value="assets/images/ginger_tea.jpg">Tea (Ginger/Black/Masala)</option>
+              <option value="assets/images/filter_coffee.jpg">Coffee (Filter/Bru)</option>
+              <option value="assets/images/badam_milk.jpg">Badam Milk / Cold Coffee</option>
+              <option value="assets/images/lemon_mint.jpg">Lemon Mint / Lime Soda</option>
+              <option value="assets/images/watermelon_juice.jpg">Watermelon Juice</option>
+            </select>
+          </label>
+
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Upload from Device Gallery
+            <input type="file" id="addFileInput" accept="image/*">
+          </label>
+
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Or Image URL / Base64
+            <input type="text" name="image_url" id="addImageUrlInput" placeholder="assets/images/... or https://...">
+          </label>
+
+          <div style="display:flex;align-items:center;gap:0.6rem;">
+            <img id="addImgPreview" src="assets/images/chicken_mutta_bonda.jpg" alt="Preview" style="width:44px;height:44px;border-radius:6px;object-fit:cover;border:1px solid var(--gold);">
+            <span style="font-size:0.75rem;color:var(--cream-dim);">Preview</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn--primary btn--sm" type="submit" style="grid-column:1/-1;">Add Menu Item</button>
     </form>
   </div>
 
@@ -85,21 +123,57 @@
   </div>
 
   <!-- Edit Item Modal -->
-  <div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; padding:1.5rem;">
-    <div class="admin-card" style="width:100%; max-width:480px; margin:0;">
+  <div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:200; align-items:center; justify-content:center; padding:1.5rem; overflow-y:auto;">
+    <div class="admin-card" style="width:100%; max-width:520px; margin:auto;">
       <h3 style="margin-bottom:1rem;">Edit Menu Item</h3>
       <form id="editForm" style="display:flex; flex-direction:column; gap:0.9rem;">
         <input type="hidden" id="editId">
         <label>Name<input type="text" id="editName" required></label>
-        <label>Price (₹)<input type="number" id="editPrice" required min="0"></label>
-        <label>Category
-          <select id="editCategory">
-            <option>Special Bonda</option><option>Veg Bonda</option><option>Non-Veg Bonda</option>
-            <option>Tea</option><option>Coffee</option><option>Juices</option><option>Combo</option>
-          </select>
-        </label>
-        <label>Image URL<input type="text" id="editImageUrl" placeholder="e.g. assets/images/kaara_bonda.jpg"></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;">
+          <label>Price (₹)<input type="number" id="editPrice" required min="0"></label>
+          <label>Category
+            <select id="editCategory">
+              <option>Special Bonda</option><option>Veg Bonda</option><option>Non-Veg Bonda</option>
+              <option>Tea</option><option>Coffee</option><option>Juices</option><option>Combo</option>
+            </select>
+          </label>
+        </div>
         <label>Display Order (Priority)<input type="number" id="editDisplayOrder" min="0" value="0"></label>
+
+        <div class="img-picker-box">
+          <span style="font-size:0.8rem;color:var(--gold-light);font-weight:600;">Change Image</span>
+          
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Pick from Shop Gallery
+            <select id="editGallerySelect">
+              <option value="">-- Choose Gallery Preset --</option>
+              <option value="assets/images/chicken_mutta_bonda.jpg">Chicken Mutta Bonda</option>
+              <option value="assets/images/kaara_bonda.jpg">Kaara Bonda</option>
+              <option value="assets/images/keerai_bonda.jpg">Keerai Bonda</option>
+              <option value="assets/images/paneer_bonda.jpg">Paneer Bonda</option>
+              <option value="assets/images/cheese_bonda.jpg">Cheese Bonda</option>
+              <option value="assets/images/mutton_bonda.jpg">Mutton / Beef Bonda</option>
+              <option value="assets/images/ginger_tea.jpg">Tea (Ginger/Black/Masala)</option>
+              <option value="assets/images/filter_coffee.jpg">Coffee (Filter/Bru)</option>
+              <option value="assets/images/badam_milk.jpg">Badam Milk / Cold Coffee</option>
+              <option value="assets/images/lemon_mint.jpg">Lemon Mint / Lime Soda</option>
+              <option value="assets/images/watermelon_juice.jpg">Watermelon Juice</option>
+            </select>
+          </label>
+
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Upload from Device Gallery
+            <input type="file" id="editFileInput" accept="image/*">
+          </label>
+
+          <label style="font-size:0.75rem;color:var(--cream-dim);">Or Image URL / Base64
+            <input type="text" id="editImageUrl" placeholder="assets/images/... or https://...">
+          </label>
+
+          <div style="display:flex;align-items:center;gap:0.6rem;margin-top:0.3rem;">
+            <img id="editImgPreview" src="assets/images/chicken_mutta_bonda.jpg" alt="Preview" style="width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid var(--gold);">
+            <span style="font-size:0.75rem;color:var(--cream-dim);">Selected Image Preview</span>
+          </div>
+        </div>
+
         <div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:0.4rem;">
           <button type="button" class="btn btn--ghost btn--sm" id="closeEditModalBtn">Cancel</button>
           <button type="submit" class="btn btn--primary btn--sm">Save Changes</button>
