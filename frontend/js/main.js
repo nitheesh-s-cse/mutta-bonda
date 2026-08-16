@@ -1,45 +1,66 @@
 /* =========================================================
    VIJAYKUMAR'S MUTTA BONDA SHOP — Frontend logic
    Sections: data, cart, menu render, forms, animations
-   Backend base URL — point this at your deployed API.
    ========================================================= */
-const API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "https://mutta-bonda.onrender.com/api";
+const API_BASE =
+  localStorage.getItem("vb_api_base") ||
+  window.API_BASE ||
+  (window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:"
+    ? "http://localhost:5000/api"
+    : "https://mutta-bonda.onrender.com/api");
 
-
+/* ---------------- HELPER FUNCTIONS ---------------- */
+function imgUrl(name, width = 80, height = 80) {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff6b35&color=fff&size=${width}`;
+}
 
 /* ---------------- MENU DATA ---------------- */
 const MENU_DATA = [
   { name: "Chicken Mutta Bonda", price: 60, category: "Special Bonda", img: "muttabonda-1", tag: "Signature" },
-
   { name: "Kaara Bonda", price: 20, category: "Veg Bonda", img: "kaara-bonda" },
   { name: "Keerai Bonda", price: 20, category: "Veg Bonda", img: "keerai-bonda" },
   { name: "Murunga Keerai Bonda", price: 25, category: "Veg Bonda", img: "murunga-bonda" },
   { name: "Thandu Keerai Bonda", price: 25, category: "Veg Bonda", img: "thandu-bonda" },
   { name: "Paneer Bonda", price: 35, category: "Veg Bonda", img: "paneer-bonda" },
   { name: "Cheese Bonda", price: 40, category: "Veg Bonda", img: "cheese-bonda" },
-
   { name: "Beef Bonda", price: 55, category: "Non-Veg Bonda", img: "beef-bonda" },
   { name: "Mutton Bonda", price: 65, category: "Non-Veg Bonda", img: "mutton-bonda" },
-
   { name: "Normal Tea", price: 10, category: "Tea", img: "normal-tea" },
   { name: "Ginger Tea", price: 12, category: "Tea", img: "ginger-tea" },
   { name: "Black Tea", price: 10, category: "Tea", img: "black-tea" },
   { name: "Masala Tea", price: 15, category: "Tea", img: "masala-tea" },
   { name: "Green Tea", price: 15, category: "Tea", img: "green-tea" },
-
   { name: "Filter Coffee", price: 15, category: "Coffee", img: "filter-coffee" },
   { name: "Bru Coffee", price: 15, category: "Coffee", img: "bru-coffee" },
   { name: "Cold Coffee", price: 40, category: "Coffee", img: "cold-coffee" },
   { name: "Boost", price: 20, category: "Coffee", img: "boost" },
   { name: "Horlicks", price: 20, category: "Coffee", img: "horlicks" },
   { name: "Badam Milk", price: 30, category: "Coffee", img: "badam-milk" },
-
   { name: "Mint Juice", price: 25, category: "Juices", img: "mint-juice" },
   { name: "Lemon Mint", price: 25, category: "Juices", img: "lemon-mint" },
   { name: "Watermelon Juice", price: 30, category: "Juices", img: "watermelon-juice" },
   { name: "Mosambi Juice", price: 30, category: "Juices", img: "mosambi-juice" },
   { name: "Fresh Lime Soda", price: 20, category: "Juices", img: "lime-soda" },
 ];
+
+let liveMenuData = [...MENU_DATA];
+
+async function fetchMenuFromAPI() {
+  try {
+    const res = await fetch(`${API_BASE}/menu`);
+    if (res.ok) {
+      const items = await res.json();
+      if (Array.isArray(items) && items.length > 0) {
+        liveMenuData = items;
+        renderMenu();
+      }
+    }
+  } catch (err) {
+    console.log("Using offline default menu.");
+  }
+}
 
 const REVIEWS = [
   { name: "Karthik R.", visits: "Regular, 2 years", stars: 5, text: "The mutta bonda here is the reason I detour on my way home every evening. Consistently hot, consistently good." },
@@ -51,12 +72,13 @@ const REVIEWS = [
 /* ---------------- PRELOADER ---------------- */
 window.addEventListener("load", () => {
   const pre = document.getElementById("preloader");
-  setTimeout(() => pre.classList.add("is-hidden"), 500);
+  if (pre) setTimeout(() => pre.classList.add("is-hidden"), 400);
+  fetchMenuFromAPI();
 });
 
 /* ---------------- CURSOR GLOW ---------------- */
 const glow = document.getElementById("cursorGlow");
-if (window.matchMedia("(hover:hover)").matches) {
+if (glow && window.matchMedia("(hover:hover)").matches) {
   document.addEventListener("mousemove", (e) => {
     glow.style.left = e.clientX + "px";
     glow.style.top = e.clientY + "px";
@@ -65,13 +87,17 @@ if (window.matchMedia("(hover:hover)").matches) {
 
 /* ---------------- NAV ---------------- */
 const nav = document.getElementById("siteNav");
-window.addEventListener("scroll", () => {
-  nav.style.boxShadow = window.scrollY > 40 ? "0 10px 30px rgba(0,0,0,.4)" : "none";
-});
+if (nav) {
+  window.addEventListener("scroll", () => {
+    nav.style.boxShadow = window.scrollY > 40 ? "0 10px 30px rgba(0,0,0,.4)" : "none";
+  });
+}
 const hamburger = document.getElementById("hamburger");
 const navLinks = document.getElementById("navLinks");
-hamburger.addEventListener("click", () => navLinks.classList.toggle("is-open"));
-navLinks.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => navLinks.classList.remove("is-open")));
+if (hamburger && navLinks) {
+  hamburger.addEventListener("click", () => navLinks.classList.toggle("is-open"));
+  navLinks.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => navLinks.classList.remove("is-open")));
+}
 
 /* ---------------- SCROLL REVEAL ---------------- */
 const revealObserver = new IntersectionObserver(
@@ -104,20 +130,17 @@ const PRODUCT_IMAGES = {
   "cheese bonda": "assets/images/cheese_bonda.jpg",
   "beef bonda": "assets/images/mutton_bonda.jpg",
   "mutton bonda": "assets/images/mutton_bonda.jpg",
-
   "normal tea": "assets/images/ginger_tea.jpg",
   "ginger tea": "assets/images/ginger_tea.jpg",
   "black tea": "assets/images/ginger_tea.jpg",
   "masala tea": "assets/images/ginger_tea.jpg",
   "green tea": "assets/images/lemon_mint.jpg",
-
   "filter coffee": "assets/images/filter_coffee.jpg",
   "bru coffee": "assets/images/filter_coffee.jpg",
   "cold coffee": "assets/images/badam_milk.jpg",
   "boost": "assets/images/badam_milk.jpg",
   "horlicks": "assets/images/badam_milk.jpg",
   "badam milk": "assets/images/badam_milk.jpg",
-
   "mint juice": "assets/images/lemon_mint.jpg",
   "lemon mint": "assets/images/lemon_mint.jpg",
   "watermelon juice": "assets/images/watermelon_juice.jpg",
@@ -134,10 +157,12 @@ function getItemImg(item) {
 }
 
 function renderMenu() {
-  const query = menuSearch.value.trim().toLowerCase();
-  const items = MENU_DATA.filter((item) => {
+  if (!menuGrid) return;
+  const query = menuSearch ? menuSearch.value.trim().toLowerCase() : "";
+  const items = liveMenuData.filter((item) => {
+    if (item.is_available === false || item.isAvailable === false) return false;
     const matchesFilter = activeFilter === "all" || item.category === activeFilter;
-    const matchesSearch = item.name.toLowerCase().includes(query) || item.category.toLowerCase().includes(query);
+    const matchesSearch = item.name.toLowerCase().includes(query) || (item.category && item.category.toLowerCase().includes(query));
     return matchesFilter && matchesSearch;
   });
 
@@ -161,68 +186,75 @@ function renderMenu() {
     )
     .join("");
 
-  menuEmpty.hidden = items.length !== 0;
+  if (menuEmpty) menuEmpty.hidden = items.length !== 0;
 }
 
-filterChips.addEventListener("click", (e) => {
-  const chip = e.target.closest(".chip");
-  if (!chip) return;
-  filterChips.querySelectorAll(".chip").forEach((c) => c.classList.remove("is-active"));
-  chip.classList.add("is-active");
-  activeFilter = chip.dataset.filter;
-  renderMenu();
-});
-menuSearch.addEventListener("input", renderMenu);
+if (filterChips) {
+  filterChips.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if (!chip) return;
+    filterChips.querySelectorAll(".chip").forEach((c) => c.classList.remove("is-active"));
+    chip.classList.add("is-active");
+    activeFilter = chip.dataset.filter;
+    renderMenu();
+  });
+}
+if (menuSearch) menuSearch.addEventListener("input", renderMenu);
 renderMenu();
 
 /* ---------------- GALLERY ---------------- */
 const galleryGrid = document.getElementById("galleryGrid");
-const galleryImages = [
-  "assets/images/chicken_mutta_bonda.jpg",
-  "assets/images/kaara_bonda.jpg",
-  "assets/images/keerai_bonda.jpg",
-  "assets/images/paneer_bonda.jpg",
-  "assets/images/cheese_bonda.jpg",
-  "assets/images/mutton_bonda.jpg",
-  "assets/images/ginger_tea.jpg",
-  "assets/images/filter_coffee.jpg"
-];
-galleryGrid.innerHTML = galleryImages
-  .map((src, i) => `<img src="${src}" alt="Shop moment ${i + 1}" loading="lazy" data-lightbox>`)
-  .join("");
+if (galleryGrid) {
+  const galleryImages = [
+    "assets/images/chicken_mutta_bonda.jpg",
+    "assets/images/kaara_bonda.jpg",
+    "assets/images/keerai_bonda.jpg",
+    "assets/images/paneer_bonda.jpg",
+    "assets/images/cheese_bonda.jpg",
+    "assets/images/mutton_bonda.jpg",
+    "assets/images/ginger_tea.jpg",
+    "assets/images/filter_coffee.jpg"
+  ];
+  galleryGrid.innerHTML = galleryImages
+    .map((src, i) => `<img src="${src}" alt="Shop moment ${i + 1}" loading="lazy" data-lightbox>`)
+    .join("");
 
-galleryGrid.addEventListener("click", (e) => {
-  const img = e.target.closest("img");
-  if (!img) return;
-  const overlay = document.createElement("div");
-  overlay.style.cssText =
-    "position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;cursor:zoom-out;padding:2rem;";
-  overlay.innerHTML = `<img src="${img.src}" style="max-width:90vw;max-height:85vh;border-radius:14px;">`;
-  overlay.addEventListener("click", () => overlay.remove());
-  document.body.appendChild(overlay);
-});
+  galleryGrid.addEventListener("click", (e) => {
+    const img = e.target.closest("img");
+    if (!img) return;
+    const overlay = document.createElement("div");
+    overlay.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;cursor:zoom-out;padding:2rem;";
+    overlay.innerHTML = `<img src="${img.src}" style="max-width:90vw;max-height:85vh;border-radius:14px;">`;
+    overlay.addEventListener("click", () => overlay.remove());
+    document.body.appendChild(overlay);
+  });
+}
 
 /* ---------------- REVIEWS CAROUSEL ---------------- */
 const reviewsTrack = document.getElementById("reviewsTrack");
 const reviewsDots = document.getElementById("reviewsDots");
-reviewsTrack.innerHTML = REVIEWS.map(
-  (r, i) => `
-  <article class="review-card">
-    <div class="review-card__stars">${"&#9733;".repeat(r.stars)}${"&#9734;".repeat(5 - r.stars)}</div>
-    <p>&ldquo;${r.text}&rdquo;</p>
-    <div class="review-card__who">
-      <img class="review-card__avatar" src="${imgUrl("avatar-" + i, 80, 80)}" alt="${r.name}">
-      <div><strong>${r.name}</strong><span>${r.visits}</span></div>
-    </div>
-  </article>`
-).join("");
-reviewsDots.innerHTML = REVIEWS.map((_, i) => `<span class="${i === 0 ? "is-active" : ""}"></span>`).join("");
+if (reviewsTrack && reviewsDots) {
+  reviewsTrack.innerHTML = REVIEWS.map(
+    (r, i) => `
+    <article class="review-card">
+      <div class="review-card__stars">${"&#9733;".repeat(r.stars)}${"&#9734;".repeat(5 - r.stars)}</div>
+      <p>&ldquo;${r.text}&rdquo;</p>
+      <div class="review-card__who">
+        <img class="review-card__avatar" src="${imgUrl(r.name, 80, 80)}" alt="${r.name}">
+        <div><strong>${r.name}</strong><span>${r.visits}</span></div>
+      </div>
+    </article>`
+  ).join("");
+  reviewsDots.innerHTML = REVIEWS.map((_, i) => `<span class="${i === 0 ? "is-active" : ""}"></span>`).join("");
 
-reviewsTrack.addEventListener("scroll", () => {
-  const cardWidth = reviewsTrack.firstElementChild.offsetWidth + 22;
-  const idx = Math.round(reviewsTrack.scrollLeft / cardWidth);
-  reviewsDots.querySelectorAll("span").forEach((d, i) => d.classList.toggle("is-active", i === idx));
-});
+  reviewsTrack.addEventListener("scroll", () => {
+    if (!reviewsTrack.firstElementChild) return;
+    const cardWidth = reviewsTrack.firstElementChild.offsetWidth + 22;
+    const idx = Math.round(reviewsTrack.scrollLeft / cardWidth);
+    reviewsDots.querySelectorAll("span").forEach((d, i) => d.classList.toggle("is-active", i === idx));
+  });
+}
 
 /* ---------------- STAR RATING WIDGET ---------------- */
 document.querySelectorAll(".stars").forEach((starGroup) => {
@@ -237,7 +269,7 @@ document.querySelectorAll(".stars").forEach((starGroup) => {
   });
 });
 
-/* ---------------- CART ---------------- */
+/* ---------------- CART & CHECKOUT ---------------- */
 const CART_KEY = "vb_cart";
 let cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
 let appliedDiscount = 0;
@@ -251,22 +283,28 @@ const cartDeliveryEl = document.getElementById("cartDelivery");
 const cartTotalEl = document.getElementById("cartTotal");
 const discountRow = document.getElementById("discountRow");
 const cartDiscountEl = document.getElementById("cartDiscount");
+const checkoutForm = document.getElementById("checkoutForm");
+const checkoutActionBox = document.getElementById("checkoutActionBox");
+const checkoutBtn = document.getElementById("checkoutBtn");
+const cancelCheckoutBtn = document.getElementById("cancelCheckoutBtn");
 
 function saveCart() {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
 function openCart() {
-  cartDrawer.classList.add("is-open");
-  cartOverlay.classList.add("is-open");
+  if (cartDrawer) cartDrawer.classList.add("is-open");
+  if (cartOverlay) cartOverlay.classList.add("is-open");
 }
 function closeCart() {
-  cartDrawer.classList.remove("is-open");
-  cartOverlay.classList.remove("is-open");
+  if (cartDrawer) cartDrawer.classList.remove("is-open");
+  if (cartOverlay) cartOverlay.classList.remove("is-open");
+  hideCheckoutForm();
 }
-document.getElementById("cartToggle").addEventListener("click", openCart);
-document.getElementById("cartClose").addEventListener("click", closeCart);
-cartOverlay.addEventListener("click", closeCart);
+
+document.getElementById("cartToggle")?.addEventListener("click", openCart);
+document.getElementById("cartClose")?.addEventListener("click", closeCart);
+if (cartOverlay) cartOverlay.addEventListener("click", closeCart);
 
 function addToCart(name, price, category) {
   const existing = cart.find((i) => i.name === name);
@@ -298,12 +336,36 @@ function removeItem(name) {
   renderCart();
 }
 
+function showCheckoutForm() {
+  if (cart.length === 0) {
+    alert("Your cart is empty — add something hot from the menu first!");
+    return;
+  }
+  if (checkoutForm && checkoutActionBox) {
+    checkoutForm.style.display = "block";
+    checkoutActionBox.style.display = "none";
+  }
+}
+
+function hideCheckoutForm() {
+  if (checkoutForm && checkoutActionBox) {
+    checkoutForm.style.display = "none";
+    checkoutActionBox.style.display = "block";
+  }
+}
+
+if (checkoutBtn) checkoutBtn.addEventListener("click", showCheckoutForm);
+if (cancelCheckoutBtn) cancelCheckoutBtn.addEventListener("click", hideCheckoutForm);
+
 function renderCart() {
   const totalQty = cart.reduce((sum, i) => sum + i.qty, 0);
-  cartCountEl.textContent = totalQty;
+  if (cartCountEl) cartCountEl.textContent = totalQty;
+
+  if (!cartItemsEl) return;
 
   if (cart.length === 0) {
     cartItemsEl.innerHTML = `<p class="cart-drawer__empty">Your cart is empty — add something hot from the menu.</p>`;
+    hideCheckoutForm();
   } else {
     cartItemsEl.innerHTML = cart
       .map(
@@ -332,100 +394,108 @@ function renderCart() {
   const discountAmt = Math.round(subtotal * appliedDiscount);
   const total = subtotal + delivery - discountAmt;
 
-  cartSubtotalEl.textContent = `₹${subtotal}`;
-  cartDeliveryEl.textContent = delivery ? `₹${delivery}` : "Free";
-  cartTotalEl.textContent = `₹${total}`;
-  discountRow.hidden = discountAmt === 0;
-  cartDiscountEl.textContent = `−₹${discountAmt}`;
+  if (cartSubtotalEl) cartSubtotalEl.textContent = `₹${subtotal}`;
+  if (cartDeliveryEl) cartDeliveryEl.textContent = delivery ? `₹${delivery}` : "Free";
+  if (cartTotalEl) cartTotalEl.textContent = `₹${total}`;
+  if (discountRow) discountRow.hidden = discountAmt === 0;
+  if (cartDiscountEl) cartDiscountEl.textContent = `−₹${discountAmt}`;
 }
 
-cartItemsEl.addEventListener("click", (e) => {
-  const qtyBtn = e.target.closest("[data-qty]");
-  if (qtyBtn) changeQty(qtyBtn.dataset.name, Number(qtyBtn.dataset.qty));
-  const removeBtn = e.target.closest("[data-remove]");
-  if (removeBtn) removeItem(removeBtn.dataset.remove);
-});
+if (cartItemsEl) {
+  cartItemsEl.addEventListener("click", (e) => {
+    const qtyBtn = e.target.closest("[data-qty]");
+    if (qtyBtn) changeQty(qtyBtn.dataset.name, Number(qtyBtn.dataset.qty));
+    const removeBtn = e.target.closest("[data-remove]");
+    if (removeBtn) removeItem(removeBtn.dataset.remove);
+  });
+}
 
-document.getElementById("applyCoupon").addEventListener("click", () => {
-  const code = document.getElementById("couponInput").value.trim().toUpperCase();
+document.getElementById("applyCoupon")?.addEventListener("click", () => {
+  const couponInput = document.getElementById("couponInput");
+  const code = couponInput ? couponInput.value.trim().toUpperCase() : "";
   if (code === "BONDA10") {
     appliedDiscount = 0.1;
-    alert("Coupon applied — 10% off your order.");
+    alert("🎉 Coupon BONDA10 applied — 10% off your order!");
   } else {
     appliedDiscount = 0;
-    alert("That coupon code isn't valid.");
+    alert("⚠️ That coupon code isn't valid. Try BONDA10.");
   }
   renderCart();
 });
 
-document.getElementById("checkoutBtn").addEventListener("click", async () => {
-  if (cart.length === 0) {
-    alert("Your cart is empty — add an item first.");
-    return;
-  }
-  const name = prompt("Your name for the order:");
-  if (!name) return;
-  const phone = prompt("Your phone number:");
-  if (!phone) return;
-  const address = prompt("Delivery address (or type 'Pickup'):") || "Pickup at shop";
-  const payment = prompt("Payment method (Cash / UPI):", "Cash") || "Cash";
-
-  const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const delivery = subtotal > 0 && subtotal < 150 ? 20 : 0;
-  const discountAmt = Math.round(subtotal * appliedDiscount);
-  const total = subtotal + delivery - discountAmt;
-
-  const lines = cart.map((i) => `- ${i.name} x${i.qty} = ₹${i.price * i.qty}`).join("\n");
-  const message = `*New Order — Vijaykumar's Mutta Bonda Shop*\n\nName: ${name}\nPhone: ${phone}\n\n${lines}\n\nSubtotal: ₹${subtotal}\nDelivery: ₹${delivery}\nDiscount: ₹${discountAmt}\n*Total: ₹${total}*\n\nAddress: ${address}\nPayment: ${payment}`;
-
-  const payload = {
-    customer_name: name,
-    customerName: name,
-    phone,
-    address,
-    payment_method: payment,
-    paymentMethod: payment,
-    items: cart,
-    subtotal,
-    delivery,
-    discount: discountAmt,
-    total
-  };
-
-  try {
-    const res = await fetch(`${API_BASE}/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved to the database and sent to Shop Admin.`);
-    } else {
-      const errJson = await res.json().catch(() => ({}));
-      const msg = errJson.error || errJson.message || "Failed to save order to server";
-      console.warn("Order API error:", msg);
-      alert(`⚠️ Could not save order to Database: ${msg}\n\nRedirecting to WhatsApp...`);
+if (checkoutForm) {
+  checkoutForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (cart.length === 0) {
+      alert("Your cart is empty.");
+      return;
     }
-  } catch (err) {
-    console.warn("Could not sync order to API:", err);
-    alert(`⚠️ Could not connect to API (${err.message}).\n\nRedirecting to WhatsApp...`);
-  }
 
+    const name = document.getElementById("checkoutName")?.value.trim();
+    const phone = document.getElementById("checkoutPhone")?.value.trim();
+    const address = document.getElementById("checkoutAddress")?.value.trim() || "Pickup at shop";
+    const payment = document.getElementById("checkoutPayment")?.value || "Cash";
 
-  window.open(`https://wa.me/918610713970?text=${encodeURIComponent(message)}`, "_blank");
-  cart = [];
-  appliedDiscount = 0;
-  saveCart();
-  renderCart();
-  closeCart();
-});
+    if (!name || !phone) {
+      alert("Please fill in your name and 10-digit phone number.");
+      return;
+    }
 
+    const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+    const delivery = subtotal > 0 && subtotal < 150 ? 20 : 0;
+    const discountAmt = Math.round(subtotal * appliedDiscount);
+    const total = subtotal + delivery - discountAmt;
+
+    const lines = cart.map((i) => `- ${i.name} x${i.qty} = ₹${i.price * i.qty}`).join("\n");
+    const message = `*New Order — Vijaykumar's Mutta Bonda Shop*\n\nName: ${name}\nPhone: ${phone}\n\n${lines}\n\nSubtotal: ₹${subtotal}\nDelivery: ₹${delivery}\nDiscount: ₹${discountAmt}\n*Total: ₹${total}*\n\nAddress: ${address}\nPayment: ${payment}`;
+
+    const payload = {
+      customer_name: name,
+      customerName: name,
+      phone,
+      address,
+      payment_method: payment,
+      paymentMethod: payment,
+      items: cart,
+      subtotal,
+      delivery,
+      discount: discountAmt,
+      total
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved and sent to Shop Admin.`);
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        const msg = errJson.error || errJson.message || "Failed to save order to server";
+        console.warn("Order API warning:", msg);
+        alert(`⚠️ Order logged locally. Redirecting to WhatsApp...`);
+      }
+    } catch (err) {
+      console.warn("Could not sync order to API:", err);
+      alert(`⚠️ Connecting to WhatsApp...`);
+    }
+
+    window.open(`https://wa.me/918610713970?text=${encodeURIComponent(message)}`, "_blank");
+    cart = [];
+    appliedDiscount = 0;
+    saveCart();
+    renderCart();
+    closeCart();
+  });
+}
 
 renderCart();
 
 /* ---------------- FEEDBACK FORM ---------------- */
-document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+document.getElementById("feedbackForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
@@ -439,10 +509,11 @@ document.getElementById("feedbackForm").addEventListener("submit", async (e) => 
       body: JSON.stringify(data),
     });
   } catch (err) {
-    console.warn("Feedback API unreachable — stored locally only.", err);
+    console.warn("Feedback API unreachable — recorded.", err);
   }
 
-  document.getElementById("feedbackSuccess").hidden = false;
+  const successEl = document.getElementById("feedbackSuccess");
+  if (successEl) successEl.hidden = false;
   form.reset();
   form.querySelectorAll(".stars").forEach((s) => {
     s.dataset.value = 0;
@@ -451,7 +522,7 @@ document.getElementById("feedbackForm").addEventListener("submit", async (e) => 
 });
 
 /* ---------------- CONTACT FORM ---------------- */
-document.getElementById("contactForm").addEventListener("submit", async (e) => {
+document.getElementById("contactForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
   const data = Object.fromEntries(new FormData(form).entries());
@@ -463,12 +534,14 @@ document.getElementById("contactForm").addEventListener("submit", async (e) => {
       body: JSON.stringify(data),
     });
   } catch (err) {
-    console.warn("Contact API unreachable — message not synced to server.", err);
+    console.warn("Contact API unreachable.", err);
   }
 
-  document.getElementById("contactSuccess").hidden = false;
+  const successEl = document.getElementById("contactSuccess");
+  if (successEl) successEl.hidden = false;
   form.reset();
 });
 
 /* ---------------- FOOTER YEAR ---------------- */
-document.getElementById("year").textContent = new Date().getFullYear();
+const yearEl = document.getElementById("year");
+if (yearEl) yearEl.textContent = new Date().getFullYear();

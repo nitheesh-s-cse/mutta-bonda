@@ -326,11 +326,43 @@
     <div class="row" id="discountRow" hidden><span>Discount</span><strong id="cartDiscount">&#8377;0</strong></div>
     <div class="row row--total"><span>Grand Total</span><strong id="cartTotal">&#8377;0</strong></div>
   </div>
-  <button class="btn btn--primary btn--full" id="checkoutBtn">Checkout on WhatsApp</button>
+
+  <form id="checkoutForm" class="checkout-form" style="display:none; padding:1rem 1.5rem; border-top:1px solid rgba(200,151,63,.15);">
+    <h4 style="margin-bottom:0.6rem; color:var(--gold-light); font-size:0.95rem;">Customer Details</h4>
+    <div style="display:flex; flex-direction:column; gap:0.6rem;">
+      <label style="display:flex; flex-direction:column; font-size:0.78rem; color:var(--cream-dim);">Your Name
+        <input type="text" id="checkoutName" required placeholder="e.g. Karthik" style="padding:0.4rem 0.6rem; background:var(--charcoal-3); border:1px solid rgba(200,151,63,.2); color:var(--cream); border-radius:4px; font-size:0.85rem;">
+      </label>
+      <label style="display:flex; flex-direction:column; font-size:0.78rem; color:var(--cream-dim);">Phone Number
+        <input type="tel" id="checkoutPhone" required placeholder="10-digit number" pattern="[0-9]{10}" style="padding:0.4rem 0.6rem; background:var(--charcoal-3); border:1px solid rgba(200,151,63,.2); color:var(--cream); border-radius:4px; font-size:0.85rem;">
+      </label>
+      <label style="display:flex; flex-direction:column; font-size:0.78rem; color:var(--cream-dim);">Delivery Address
+        <input type="text" id="checkoutAddress" placeholder="Address or 'Pickup'" value="Pickup at shop" style="padding:0.4rem 0.6rem; background:var(--charcoal-3); border:1px solid rgba(200,151,63,.2); color:var(--cream); border-radius:4px; font-size:0.85rem;">
+      </label>
+      <label style="display:flex; flex-direction:column; font-size:0.78rem; color:var(--cream-dim);">Payment Method
+        <select id="checkoutPayment" style="padding:0.4rem 0.6rem; background:var(--charcoal-3); border:1px solid rgba(200,151,63,.2); color:var(--cream); border-radius:4px; font-size:0.85rem;">
+          <option value="Cash">Cash on Delivery</option>
+          <option value="UPI">UPI / GPay / PhonePe</option>
+        </select>
+      </label>
+      <div style="display:flex; gap:0.5rem; margin-top:0.4rem;">
+        <button type="button" class="btn btn--ghost btn--sm" id="cancelCheckoutBtn">Back</button>
+        <button type="submit" class="btn btn--primary btn--sm" style="flex:1;">Confirm & Order</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="checkoutActionBox" style="padding: 1rem 1.5rem;">
+    <button class="btn btn--primary btn--full" id="checkoutBtn">Proceed to Checkout &rarr;</button>
+  </div>
 </aside>
 
-<!-- Set this to your deployed backend URL (e.g. https://mutta-bonda-shop-api.onrender.com/api) -->
-<script>window.API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "https://mutta-bonda.onrender.com/api";</script>
+<script>
+  window.API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || 
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.protocol === "file:"
+      ? "http://localhost:5000/api"
+      : "https://mutta-bonda.onrender.com/api");
+</script>
 <script src="js/main.js"></script>
 
 </body>

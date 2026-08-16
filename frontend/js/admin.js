@@ -1,4 +1,11 @@
-let API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "https://mutta-bonda.onrender.com/api";
+let API_BASE =
+  localStorage.getItem("vb_api_base") ||
+  window.API_BASE ||
+  (window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.protocol === "file:"
+    ? "http://localhost:5000/api"
+    : "https://mutta-bonda.onrender.com/api");
 
 const TOKEN_KEY = "vb_admin_token";
 
