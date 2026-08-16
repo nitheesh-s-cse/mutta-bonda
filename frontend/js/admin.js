@@ -141,6 +141,9 @@ async function loadOrders() {
           </select>
         </td>
         <td>${dateStr}</td>
+        <td>
+          <button class="btn btn--text btn--sm" data-delete-order="${orderId}" style="color:var(--danger)">Delete</button>
+        </td>
       </tr>`;
       })
       .join("");
@@ -155,11 +158,43 @@ async function loadOrders() {
         loadStats();
       });
     });
+
+    document.querySelectorAll("[data-delete-order]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this order?")) return;
+        await fetch(`${API_BASE}/orders/${btn.dataset.deleteOrder}`, {
+          method: "DELETE",
+          headers: authHeaders(),
+        });
+        loadOrders();
+        loadStats();
+      });
+    });
   } catch (err) {
     console.error("Load orders error:", err);
-    bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem;">Connection error: ${err.message}</td></tr>`;
+    bodyEl.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:1.5rem;">Connection error: ${err.message}</td></tr>`;
   }
 }
+
+document.getElementById("clearOrdersBtn")?.addEventListener("click", async () => {
+  if (!confirm("Are you sure you want to CLEAR ALL orders from the database? This cannot be undone.")) return;
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
+    if (res.ok) {
+      alert("All orders have been cleared successfully.");
+      loadDashboard();
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(`Could not clear orders: ${err.message || res.statusText}`);
+    }
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
+});
+
 
 
 

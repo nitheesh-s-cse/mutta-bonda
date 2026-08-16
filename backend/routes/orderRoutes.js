@@ -131,4 +131,35 @@ router.put("/:id/status", requireAdmin, async (req, res) => {
   }
 });
 
+// DELETE /api/orders/:id — admin only: delete single order
+router.delete("/:id", requireAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .delete()
+      .eq("id", req.params.id)
+      .select();
+
+    if (error) throw error;
+    res.json({ message: "Order deleted successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Could not delete order.", error: err.message });
+  }
+});
+
+// DELETE /api/orders — admin only: clear all orders
+router.delete("/", requireAdmin, async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .delete()
+      .neq("id", 0);
+
+    if (error) throw error;
+    res.json({ message: "All orders cleared successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Could not clear orders.", error: err.message });
+  }
+});
+
 module.exports = router;

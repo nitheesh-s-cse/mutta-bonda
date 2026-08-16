@@ -44,14 +44,18 @@
   <div class="admin-grid" id="statsGrid"></div>
 
   <div class="admin-card">
-    <h3 style="margin-bottom:1rem;">Recent Orders</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+      <h3 style="margin:0;">Recent Orders</h3>
+      <button class="btn btn--ghost btn--sm" id="clearOrdersBtn" style="color:var(--danger);border-color:rgba(224,72,60,.4);">Clear All Orders</button>
+    </div>
     <div class="table-responsive">
       <table>
-        <thead><tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
+        <thead><tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th><th>Action</th></tr></thead>
         <tbody id="ordersBody"></tbody>
       </table>
     </div>
   </div>
+
 
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Add Menu Item</h3>
