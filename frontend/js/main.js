@@ -180,6 +180,9 @@ function renderMenu() {
     const pA = CATEGORY_PRIORITY[a.category] || 99;
     const pB = CATEGORY_PRIORITY[b.category] || 99;
     if (pA !== pB) return pA - pB;
+    const orderA = a.display_order ?? a.sort_order ?? 0;
+    const orderB = b.display_order ?? b.sort_order ?? 0;
+    if (orderA !== orderB) return orderA - orderB;
     return (a.id || 0) - (b.id || 0);
   });
 

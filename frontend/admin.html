@@ -60,14 +60,16 @@
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Add Menu Item</h3>
     <form id="menuForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;align-items:end;">
-      <label>Name<input type="text" name="name" required></label>
-      <label>Price (₹)<input type="number" name="price" required min="0"></label>
+      <label>Name<input type="text" name="name" required placeholder="e.g. Special Bonda"></label>
+      <label>Price (₹)<input type="number" name="price" required min="0" placeholder="e.g. 30"></label>
       <label>Category
         <select name="category">
           <option>Special Bonda</option><option>Veg Bonda</option><option>Non-Veg Bonda</option>
           <option>Tea</option><option>Coffee</option><option>Juices</option><option>Combo</option>
         </select>
       </label>
+      <label>Image URL<input type="text" name="image_url" placeholder="e.g. assets/images/kaara_bonda.jpg"></label>
+      <label>Display Order<input type="number" name="display_order" value="0" min="0" placeholder="0"></label>
       <button class="btn btn--primary btn--sm" type="submit">Add Item</button>
     </form>
   </div>
@@ -76,9 +78,33 @@
     <h3 style="margin-bottom:1rem;">Menu Items</h3>
     <div class="table-responsive">
       <table>
-        <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th></th></tr></thead>
+        <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="menuBody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Edit Item Modal -->
+  <div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; align-items:center; justify-content:center; padding:1.5rem;">
+    <div class="admin-card" style="width:100%; max-width:480px; margin:0;">
+      <h3 style="margin-bottom:1rem;">Edit Menu Item</h3>
+      <form id="editForm" style="display:flex; flex-direction:column; gap:0.9rem;">
+        <input type="hidden" id="editId">
+        <label>Name<input type="text" id="editName" required></label>
+        <label>Price (₹)<input type="number" id="editPrice" required min="0"></label>
+        <label>Category
+          <select id="editCategory">
+            <option>Special Bonda</option><option>Veg Bonda</option><option>Non-Veg Bonda</option>
+            <option>Tea</option><option>Coffee</option><option>Juices</option><option>Combo</option>
+          </select>
+        </label>
+        <label>Image URL<input type="text" id="editImageUrl" placeholder="e.g. assets/images/kaara_bonda.jpg"></label>
+        <label>Display Order (Priority)<input type="number" id="editDisplayOrder" min="0" value="0"></label>
+        <div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:0.4rem;">
+          <button type="button" class="btn btn--ghost btn--sm" id="closeEditModalBtn">Cancel</button>
+          <button type="submit" class="btn btn--primary btn--sm">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 

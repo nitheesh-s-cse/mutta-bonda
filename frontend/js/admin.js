@@ -206,27 +206,70 @@ document.getElementById("clearOrdersBtn")?.addEventListener("click", async () =>
 
 
 
+let loadedMenuItems = [];
+
+function getItemImg(item) {
+  if (item.image_url) return item.image_url;
+  if (item.image) return item.image;
+  return "assets/images/chicken_mutta_bonda.jpg";
+}
+
 async function loadMenu() {
   try {
     const res = await fetch(`${API_BASE}/menu`);
     if (!res.ok) return;
-    const items = await res.json();
+    loadedMenuItems = await res.json();
 
-    document.getElementById("menuBody").innerHTML = items
+    document.getElementById("menuBody").innerHTML = loadedMenuItems
       .map(
         (item) => `
       <tr>
-        <td>${item.name}</td>
+        <td><img src="${getItemImg(item)}" alt="${item.name}" style="width:38px;height:38px;border-radius:6px;object-fit:cover;background:var(--charcoal-3);" onerror="this.src='assets/images/chicken_mutta_bonda.jpg'"></td>
+        <td><strong>${item.name}</strong></td>
         <td>${item.category}</td>
         <td>₹${item.price}</td>
-        <td><span class="status-pill">${item.is_available !== false && item.isAvailable !== false ? "Available" : "Disabled"}</span></td>
         <td>
+          <input type="number" class="order-input" data-order-id="${item.id || item._id}" value="${item.display_order ?? item.sort_order ?? 0}" style="width:54px;padding:0.25rem 0.4rem;font-size:0.8rem;background:var(--charcoal-3);border:1px solid rgba(200,151,63,.25);color:var(--cream);border-radius:4px;" title="Change display order">
+        </td>
+        <td><span class="status-pill">${item.is_available !== false && item.isAvailable !== false ? "Available" : "Disabled"}</span></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn--text btn--sm" data-edit="${item.id || item._id}">Edit</button>
           <button class="btn btn--text btn--sm" data-toggle="${item.id || item._id}" data-state="${item.is_available !== false && item.isAvailable !== false}">Toggle</button>
           <button class="btn btn--text btn--sm" data-delete="${item.id || item._id}" style="color:var(--danger)">Delete</button>
         </td>
       </tr>`
       )
       .join("");
+
+    document.querySelectorAll(".order-input").forEach((input) => {
+      input.addEventListener("change", async () => {
+        const id = input.dataset.orderId;
+        const newOrder = Number(input.value);
+        await fetch(`${API_BASE}/menu/${id}`, {
+          method: "PUT",
+          headers: authHeaders(),
+          body: JSON.stringify({ display_order: newOrder, sort_order: newOrder }),
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-edit]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.edit;
+        const item = loadedMenuItems.find((i) => (i.id || i._id) == id);
+        if (!item) return;
+
+        document.getElementById("editId").value = id;
+        document.getElementById("editName").value = item.name || "";
+        document.getElementById("editPrice").value = item.price || 0;
+        document.getElementById("editCategory").value = item.category || "Special Bonda";
+        document.getElementById("editImageUrl").value = item.image_url || item.image || "";
+        document.getElementById("editDisplayOrder").value = item.display_order ?? item.sort_order ?? 0;
+        
+        const modal = document.getElementById("editModal");
+        if (modal) modal.style.display = "flex";
+      });
+    });
 
     document.querySelectorAll("[data-toggle]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -252,10 +295,47 @@ async function loadMenu() {
   }
 }
 
+document.getElementById("closeEditModalBtn")?.addEventListener("click", () => {
+  const modal = document.getElementById("editModal");
+  if (modal) modal.style.display = "none";
+});
+
+document.getElementById("editForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const id = document.getElementById("editId").value;
+  const payload = {
+    name: document.getElementById("editName").value.trim(),
+    price: Number(document.getElementById("editPrice").value),
+    category: document.getElementById("editCategory").value,
+    image_url: document.getElementById("editImageUrl").value.trim(),
+    display_order: Number(document.getElementById("editDisplayOrder").value),
+    sort_order: Number(document.getElementById("editDisplayOrder").value),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/menu/${id}`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      document.getElementById("editModal").style.display = "none";
+      loadMenu();
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      alert(`Could not update menu item: ${errData.message || res.statusText}`);
+    }
+  } catch (err) {
+    alert(`Error updating item: ${err.message}`);
+  }
+});
+
 document.getElementById("menuForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = Object.fromEntries(new FormData(e.target).entries());
   data.price = Number(data.price);
+  data.display_order = Number(data.display_order || 0);
+  data.sort_order = data.display_order;
   await fetch(`${API_BASE}/menu`, {
     method: "POST",
     headers: authHeaders(),
