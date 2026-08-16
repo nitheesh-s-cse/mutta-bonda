@@ -77,11 +77,22 @@ router.get("/stats", requireAdmin, async (req, res) => {
 
     const itemCounts = {};
     allOrders.forEach((order) => {
-      (order.items || []).forEach((item) => {
-        itemCounts[item.name] = (itemCounts[item.name] || 0) + (item.qty || 0);
+      let itemsArr = [];
+      try {
+        itemsArr = Array.isArray(order.items)
+          ? order.items
+          : (typeof order.items === "string" ? JSON.parse(order.items) : []);
+      } catch (e) {
+        itemsArr = [];
+      }
+      itemsArr.forEach((item) => {
+        if (item && item.name) {
+          itemCounts[item.name] = (itemCounts[item.name] || 0) + (Number(item.qty || item.quantity) || 1);
+        }
       });
     });
     const topItem = Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0];
+
 
     res.json({
       dailySales: sum(dailyOrders),

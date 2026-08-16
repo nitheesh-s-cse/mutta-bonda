@@ -93,26 +93,49 @@ async function loadStats() {
 async function loadOrders() {
   try {
     const res = await fetch(`${API_BASE}/orders`, { headers: authHeaders() });
-    if (!res.ok) return;
+    if (!res.ok) {
+      console.warn("Load orders non-OK:", res.status);
+      return;
+    }
     const orders = await res.json();
     const statuses = ["Pending", "Accepted", "Preparing", "Delivered", "Rejected"];
 
+    if (!Array.isArray(orders) || orders.length === 0) {
+      document.getElementById("ordersBody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cream-dim);padding:1.5rem;">No orders placed yet.</td></tr>`;
+      return;
+    }
+
     document.getElementById("ordersBody").innerHTML = orders
       .slice(0, 30)
-      .map(
-        (o) => `
+      .map((o) => {
+        let itemsArr = [];
+        try {
+          itemsArr = Array.isArray(o.items)
+            ? o.items
+            : (typeof o.items === "string" ? JSON.parse(o.items) : []);
+        } catch (e) {
+          itemsArr = [];
+        }
+        const itemsStr = itemsArr.map((i) => `${i.name || "Item"} x${i.qty || i.quantity || 1}`).join(", ") || "Order Items";
+        const orderId = o.id || o._id || "";
+        const custName = o.customer_name || o.customerName || "Customer";
+        const custPhone = o.phone || "";
+        const orderTotal = o.total || 0;
+        const dateStr = new Date(o.created_at || o.createdAt || Date.now()).toLocaleString();
+
+        return `
       <tr>
-        <td>${o.customer_name || o.customerName || "Customer"}<br><small style="color:var(--cream-dim)">${o.phone || ""}</small></td>
-        <td>${(o.items || []).map((i) => `${i.name} x${i.qty || i.quantity || 1}`).join(", ")}</td>
-        <td>₹${o.total}</td>
+        <td>${custName}<br><small style="color:var(--cream-dim)">${custPhone}</small></td>
+        <td>${itemsStr}</td>
+        <td>₹${orderTotal}</td>
         <td>
-          <select data-order="${o.id || o._id}">
+          <select data-order="${orderId}">
             ${statuses.map((s) => `<option value="${s}" ${s === o.status ? "selected" : ""}>${s}</option>`).join("")}
           </select>
         </td>
-        <td>${new Date(o.created_at || o.createdAt || Date.now()).toLocaleString()}</td>
-      </tr>`
-      )
+        <td>${dateStr}</td>
+      </tr>`;
+      })
       .join("");
 
     document.querySelectorAll("[data-order]").forEach((sel) => {
@@ -129,6 +152,7 @@ async function loadOrders() {
     console.error("Load orders error:", err);
   }
 }
+
 
 async function loadMenu() {
   try {
