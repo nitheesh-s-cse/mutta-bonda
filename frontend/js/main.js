@@ -94,8 +94,43 @@ const menuSearch = document.getElementById("menuSearch");
 const filterChips = document.getElementById("filterChips");
 let activeFilter = "all";
 
-function imgUrl(seed, w = 400, h = 300) {
-  return `https://picsum.photos/seed/${seed}/${w}/${h}`;
+const PRODUCT_IMAGES = {
+  "chicken mutta bonda": "assets/images/chicken_mutta_bonda.jpg",
+  "kaara bonda": "assets/images/kaara_bonda.jpg",
+  "keerai bonda": "assets/images/keerai_bonda.jpg",
+  "murunga keerai bonda": "assets/images/keerai_bonda.jpg",
+  "thandu keerai bonda": "assets/images/keerai_bonda.jpg",
+  "paneer bonda": "assets/images/paneer_bonda.jpg",
+  "cheese bonda": "assets/images/cheese_bonda.jpg",
+  "beef bonda": "assets/images/mutton_bonda.jpg",
+  "mutton bonda": "assets/images/mutton_bonda.jpg",
+
+  "normal tea": "assets/images/ginger_tea.jpg",
+  "ginger tea": "assets/images/ginger_tea.jpg",
+  "black tea": "assets/images/ginger_tea.jpg",
+  "masala tea": "assets/images/ginger_tea.jpg",
+  "green tea": "assets/images/lemon_mint.jpg",
+
+  "filter coffee": "assets/images/filter_coffee.jpg",
+  "bru coffee": "assets/images/filter_coffee.jpg",
+  "cold coffee": "assets/images/badam_milk.jpg",
+  "boost": "assets/images/badam_milk.jpg",
+  "horlicks": "assets/images/badam_milk.jpg",
+  "badam milk": "assets/images/badam_milk.jpg",
+
+  "mint juice": "assets/images/lemon_mint.jpg",
+  "lemon mint": "assets/images/lemon_mint.jpg",
+  "watermelon juice": "assets/images/watermelon_juice.jpg",
+  "mosambi juice": "assets/images/watermelon_juice.jpg",
+  "fresh lime soda": "assets/images/lemon_mint.jpg"
+};
+
+function getItemImg(item) {
+  if (item.image_url) return item.image_url;
+  if (item.image) return item.image;
+  const nameKey = (item.name || "").toLowerCase().trim();
+  if (PRODUCT_IMAGES[nameKey]) return PRODUCT_IMAGES[nameKey];
+  return "assets/images/chicken_mutta_bonda.jpg";
 }
 
 function renderMenu() {
@@ -111,7 +146,7 @@ function renderMenu() {
       (item) => `
     <article class="menu-card">
       <div class="menu-card__img">
-        <img src="${imgUrl(item.img)}" alt="${item.name}" loading="lazy">
+        <img src="${getItemImg(item)}" alt="${item.name}" loading="lazy">
         <span class="menu-card__cat">${item.category}</span>
       </div>
       <div class="menu-card__body">
@@ -142,9 +177,18 @@ renderMenu();
 
 /* ---------------- GALLERY ---------------- */
 const galleryGrid = document.getElementById("galleryGrid");
-const galleryImages = ["gallery-1", "gallery-2", "gallery-3", "gallery-4", "gallery-5", "gallery-6", "gallery-7", "gallery-8"];
+const galleryImages = [
+  "assets/images/chicken_mutta_bonda.jpg",
+  "assets/images/kaara_bonda.jpg",
+  "assets/images/keerai_bonda.jpg",
+  "assets/images/paneer_bonda.jpg",
+  "assets/images/cheese_bonda.jpg",
+  "assets/images/mutton_bonda.jpg",
+  "assets/images/ginger_tea.jpg",
+  "assets/images/filter_coffee.jpg"
+];
 galleryGrid.innerHTML = galleryImages
-  .map((seed, i) => `<img src="${imgUrl(seed, 500, 380 + (i % 3) * 60)}" alt="Shop moment ${i + 1}" loading="lazy" data-lightbox>`)
+  .map((src, i) => `<img src="${src}" alt="Shop moment ${i + 1}" loading="lazy" data-lightbox>`)
   .join("");
 
 galleryGrid.addEventListener("click", (e) => {
@@ -153,7 +197,7 @@ galleryGrid.addEventListener("click", (e) => {
   const overlay = document.createElement("div");
   overlay.style.cssText =
     "position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;cursor:zoom-out;padding:2rem;";
-  overlay.innerHTML = `<img src="${img.src.replace(/\/\d+\/\d+$/, "/900/700")}" style="max-width:90vw;max-height:85vh;border-radius:14px;">`;
+  overlay.innerHTML = `<img src="${img.src}" style="max-width:90vw;max-height:85vh;border-radius:14px;">`;
   overlay.addEventListener("click", () => overlay.remove());
   document.body.appendChild(overlay);
 });
@@ -265,7 +309,7 @@ function renderCart() {
       .map(
         (item) => `
       <div class="cart-item">
-        <img class="cart-item__img" src="${imgUrl("cart-" + item.name.replace(/\s+/g, "-").toLowerCase(), 100, 100)}" alt="${item.name}">
+        <img class="cart-item__img" src="${getItemImg(item)}" alt="${item.name}">
         <div class="cart-item__body">
           <h5>${item.name}</h5>
           <div class="qty-control">
