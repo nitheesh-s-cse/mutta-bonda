@@ -1,0 +1,28 @@
+-- Seed data — initial menu items
+INSERT INTO menu_items (name, price, category, img, tag, is_todays_special) VALUES
+  ('Chicken Mutta Bonda', 60, 'Special Bonda', 'muttabonda-1', 'Signature', true),
+  ('Kaara Bonda', 20, 'Veg Bonda', 'kaara-bonda', NULL, false),
+  ('Keerai Bonda', 20, 'Veg Bonda', 'keerai-bonda', NULL, false),
+  ('Murunga Keerai Bonda', 25, 'Veg Bonda', 'murunga-bonda', NULL, false),
+  ('Thandu Keerai Bonda', 25, 'Veg Bonda', 'thandu-bonda', NULL, false),
+  ('Paneer Bonda', 35, 'Veg Bonda', 'paneer-bonda', NULL, false),
+  ('Cheese Bonda', 40, 'Veg Bonda', 'cheese-bonda', NULL, false),
+  ('Beef Bonda', 55, 'Non-Veg Bonda', 'beef-bonda', NULL, false),
+  ('Mutton Bonda', 65, 'Non-Veg Bonda', 'mutton-bonda', NULL, false),
+  ('Normal Tea', 10, 'Tea', 'normal-tea', NULL, false),
+  ('Ginger Tea', 12, 'Tea', 'ginger-tea', NULL, false),
+  ('Black Tea', 10, 'Tea', 'black-tea', NULL, false),
+  ('Masala Tea', 15, 'Tea', 'masala-tea', NULL, false),
+  ('Green Tea', 15, 'Tea', 'green-tea', NULL, false),
+  ('Filter Coffee', 15, 'Coffee', 'filter-coffee', NULL, false),
+  ('Bru Coffee', 15, 'Coffee', 'bru-coffee', NULL, false),
+  ('Cold Coffee', 40, 'Coffee', 'cold-coffee', NULL, false),
+  ('Boost', 20, 'Coffee', 'boost', NULL, false),
+  ('Horlicks', 20, 'Coffee', 'horlicks', NULL, false),
+  ('Badam Milk', 30, 'Coffee', 'badam-milk', NULL, false),
+  ('Mint Juice', 25, 'Juices', 'mint-juice', NULL, false),
+  ('Lemon Mint', 25, 'Juices', 'lemon-mint', NULL, false),
+  ('Watermelon Juice', 30, 'Juices', 'watermelon-juice', NULL, false),
+  ('Mosambi Juice', 30, 'Juices', 'mosambi-juice', NULL, false),
+  ('Fresh Lime Soda', 20, 'Juices', 'lime-soda', NULL, false)
+ON CONFLICT DO NOTHING;

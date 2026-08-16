@@ -1,5 +1,5 @@
 const express = require("express");
-const Order = require("../models/Order");
+const supabase = require("../config/supabase");
 const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
@@ -7,8 +7,13 @@ const router = express.Router();
 // POST /api/orders — public: customer places an order
 router.post("/", async (req, res) => {
   try {
-    const order = await Order.create(req.body);
-    res.status(201).json(order);
+    const { data, error } = await supabase
+      .from("orders")
+      .insert([req.body])
+      .select();
+
+    if (error) throw error;
+    res.status(201).json(data[0]);
   } catch (err) {
     res.status(400).json({ message: "Could not place order.", error: err.message });
   }
@@ -17,16 +22,18 @@ router.post("/", async (req, res) => {
 // GET /api/orders — admin only: list orders (optional ?status=&search=)
 router.get("/", requireAdmin, async (req, res) => {
   try {
-    const filter = {};
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.search) {
-      filter.$or = [
-        { customerName: new RegExp(req.query.search, "i") },
-        { phone: new RegExp(req.query.search, "i") },
-      ];
+    let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
+
+    if (req.query.status) {
+      query = query.eq("status", req.query.status);
     }
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
-    res.json(orders);
+    if (req.query.search) {
+      query = query.or(`customer_name.ilike.%${req.query.search}%,phone.ilike.%${req.query.search}%`);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    res.json(data);
   } catch (err) {
     res.status(500).json({ message: "Could not load orders.", error: err.message });
   }
@@ -39,18 +46,21 @@ router.get("/stats", requireAdmin, async (req, res) => {
     startOfDay.setHours(0, 0, 0, 0);
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-    const [dailyOrders, monthlyOrders, allOrders] = await Promise.all([
-      Order.find({ createdAt: { $gte: startOfDay } }),
-      Order.find({ createdAt: { $gte: startOfMonth } }),
-      Order.find({}),
-    ]);
+    const { data: allOrders, error } = await supabase
+      .from("orders")
+      .select("*");
 
-    const sum = (orders) => orders.reduce((total, o) => total + o.total, 0);
+    if (error) throw error;
+
+    const dailyOrders = allOrders.filter((o) => new Date(o.created_at) >= startOfDay);
+    const monthlyOrders = allOrders.filter((o) => new Date(o.created_at) >= startOfMonth);
+
+    const sum = (orders) => orders.reduce((total, o) => total + (o.total || 0), 0);
 
     const itemCounts = {};
     allOrders.forEach((order) => {
-      order.items.forEach((item) => {
-        itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+      (order.items || []).forEach((item) => {
+        itemCounts[item.name] = (itemCounts[item.name] || 0) + (item.qty || 0);
       });
     });
     const topItem = Object.entries(itemCounts).sort((a, b) => b[1] - a[1])[0];
@@ -77,9 +87,16 @@ router.put("/:id/status", requireAdmin, async (req, res) => {
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: `Status must be one of: ${allowed.join(", ")}` });
     }
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
-    if (!order) return res.status(404).json({ message: "Order not found." });
-    res.json(order);
+
+    const { data, error } = await supabase
+      .from("orders")
+      .update({ status })
+      .eq("id", req.params.id)
+      .select();
+
+    if (error) throw error;
+    if (!data || data.length === 0) return res.status(404).json({ message: "Order not found." });
+    res.json(data[0]);
   } catch (err) {
     res.status(500).json({ message: "Could not update order status.", error: err.message });
   }

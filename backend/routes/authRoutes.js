@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const Admin = require("../models/Admin");
+const bcrypt = require("bcryptjs");
+const supabase = require("../config/supabase");
 
 const router = express.Router();
 
@@ -12,19 +13,27 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
-    if (!admin) return res.status(401).json({ message: "Invalid email or password." });
+    const { data: admins, error } = await supabase
+      .from("admin_users")
+      .select("*")
+      .eq("email", email.toLowerCase());
 
-    const isMatch = await admin.comparePassword(password);
+    if (error) throw error;
+    if (!admins || admins.length === 0) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    const admin = admins[0];
+    const isMatch = await bcrypt.compare(password, admin.password_hash);
     if (!isMatch) return res.status(401).json({ message: "Invalid email or password." });
 
     const token = jwt.sign(
-      { id: admin._id, email: admin.email, name: admin.name },
+      { id: admin.id, email: admin.email, name: admin.name || "Admin" },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
     );
 
-    res.json({ token, admin: { email: admin.email, name: admin.name } });
+    res.json({ token, admin: { email: admin.email, name: admin.name || "Admin" } });
   } catch (err) {
     res.status(500).json({ message: "Login failed.", error: err.message });
   }
