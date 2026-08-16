@@ -70,8 +70,9 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
 });
 
 async function loadDashboard() {
-  await Promise.all([loadStats(), loadOrders(), loadMenu()]);
+  await Promise.all([loadStats(), loadOrders(), loadMenu(), loadFeedback()]);
 }
+
 
 async function loadStats() {
   try {
@@ -257,5 +258,42 @@ document.getElementById("menuForm").addEventListener("submit", async (e) => {
   loadMenu();
 });
 
+async function loadFeedback() {
+  const bodyEl = document.getElementById("feedbackBody");
+  if (!bodyEl) return;
+  try {
+    const res = await fetch(`${API_BASE}/feedback`, { headers: authHeaders() });
+    if (!res.ok) {
+      bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem;">Could not load customer feedback.</td></tr>`;
+      return;
+    }
+    const items = await res.json();
+    if (!Array.isArray(items) || items.length === 0) {
+      bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cream-dim);padding:1.5rem;">No customer feedback submitted yet.</td></tr>`;
+      return;
+    }
+
+    bodyEl.innerHTML = items
+      .map((f) => {
+        let ratingsStr = "—";
+        if (f.ratings && typeof f.ratings === "object") {
+          ratingsStr = Object.entries(f.ratings).map(([k, v]) => `${k}: ${v}★`).join(", ");
+        }
+        return `
+      <tr>
+        <td><strong>${f.name || "Anonymous"}</strong><br><small style="color:var(--cream-dim)">${f.phone || ""}</small></td>
+        <td>${f.visit_date || f.visitDate || "—"}</td>
+        <td><span class="status-pill">${f.food_quality || f.foodQuality || "Good"}</span></td>
+        <td>${ratingsStr}</td>
+        <td>${f.suggestions || f.favourite_item || "No suggestions"}</td>
+      </tr>`;
+      })
+      .join("");
+  } catch (err) {
+    console.error("Load feedback error:", err);
+  }
+}
+
 init();
+
 
