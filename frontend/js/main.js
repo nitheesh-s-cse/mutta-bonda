@@ -156,6 +156,16 @@ function getItemImg(item) {
   return "assets/images/chicken_mutta_bonda.jpg";
 }
 
+const CATEGORY_PRIORITY = {
+  "Special Bonda": 1,
+  "Veg Bonda": 2,
+  "Non-Veg Bonda": 3,
+  "Tea": 4,
+  "Coffee": 5,
+  "Juices": 6,
+  "Combo": 7
+};
+
 function renderMenu() {
   if (!menuGrid) return;
   const query = menuSearch ? menuSearch.value.trim().toLowerCase() : "";
@@ -164,6 +174,13 @@ function renderMenu() {
     const matchesFilter = activeFilter === "all" || item.category === activeFilter;
     const matchesSearch = item.name.toLowerCase().includes(query) || (item.category && item.category.toLowerCase().includes(query));
     return matchesFilter && matchesSearch;
+  });
+
+  items.sort((a, b) => {
+    const pA = CATEGORY_PRIORITY[a.category] || 99;
+    const pB = CATEGORY_PRIORITY[b.category] || 99;
+    if (pA !== pB) return pA - pB;
+    return (a.id || 0) - (b.id || 0);
   });
 
   menuGrid.innerHTML = items

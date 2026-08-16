@@ -7,7 +7,7 @@ const router = express.Router();
 // GET /api/menu — public: list all items (optional ?category=)
 router.get("/", async (req, res) => {
   try {
-    let query = supabase.from("menu_items").select("*").order("category").order("name");
+    let query = supabase.from("menu_items").select("*").order("id", { ascending: true });
 
     if (req.query.category) {
       query = query.eq("category", req.query.category);
