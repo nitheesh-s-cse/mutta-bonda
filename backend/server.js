@@ -13,6 +13,12 @@ const app = express();
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || "*" }));
 app.use(express.json());
 
+app.get("/", (req, res) => res.json({
+  message: "Mutta Bonda Shop API is running successfully!",
+  health: "/api/health",
+  endpoints: ["/api/menu", "/api/orders", "/api/feedback", "/api/contact", "/api/auth"]
+}));
+
 app.get("/api/health", (req, res) => res.json({ status: "ok", service: "mutta-bonda-shop-api" }));
 
 app.use("/api/auth", authRoutes);
