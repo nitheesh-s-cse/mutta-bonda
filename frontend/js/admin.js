@@ -324,7 +324,37 @@ async function loadMenu() {
   }
 }
 
-/* ---------------- IMAGE PICKER & FILE UPLOAD HANDLERS ---------------- */
+function compressImage(file, maxDimension = 600, quality = 0.75) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function bindImagePickers(gallerySelectId, fileInputId, textInputId, previewImgId) {
   const gallerySel = document.getElementById(gallerySelectId);
   const fileInp = document.getElementById(fileInputId);
@@ -341,15 +371,16 @@ function bindImagePickers(gallerySelectId, fileInputId, textInputId, previewImgI
   }
 
   if (fileInp && textInp && prevImg) {
-    fileInp.addEventListener("change", (e) => {
+    fileInp.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        textInp.value = event.target.result;
-        prevImg.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedDataUrl = await compressImage(file);
+        textInp.value = compressedDataUrl;
+        prevImg.src = compressedDataUrl;
+      } catch (err) {
+        console.warn("Image compression fallback:", err);
+      }
     });
   }
 
