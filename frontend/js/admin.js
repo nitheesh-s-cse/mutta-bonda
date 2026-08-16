@@ -91,22 +91,29 @@ async function loadStats() {
 }
 
 async function loadOrders() {
+  const bodyEl = document.getElementById("ordersBody");
   try {
     const res = await fetch(`${API_BASE}/orders`, { headers: authHeaders() });
     if (!res.ok) {
-      console.warn("Load orders non-OK:", res.status);
+      const errData = await res.json().catch(() => ({}));
+      console.warn("Load orders non-OK:", res.status, errData);
+      if (res.status === 401) {
+        bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem;">Session expired or invalid token.<br><br><button type="button" class="btn btn--primary btn--sm" onclick="localStorage.removeItem('vb_admin_token');location.reload();">Log In Again</button></td></tr>`;
+      } else {
+        bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem;">Could not load orders: ${errData.error || errData.message || res.statusText}</td></tr>`;
+      }
       return;
     }
     const orders = await res.json();
     const statuses = ["Pending", "Accepted", "Preparing", "Delivered", "Rejected"];
 
     if (!Array.isArray(orders) || orders.length === 0) {
-      document.getElementById("ordersBody").innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cream-dim);padding:1.5rem;">No orders placed yet.</td></tr>`;
+      bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cream-dim);padding:1.5rem;">No orders placed yet. Place an order on the site to test!</td></tr>`;
       return;
     }
 
-    document.getElementById("ordersBody").innerHTML = orders
-      .slice(0, 30)
+    bodyEl.innerHTML = orders
+      .slice(0, 50)
       .map((o) => {
         let itemsArr = [];
         try {
@@ -150,8 +157,10 @@ async function loadOrders() {
     });
   } catch (err) {
     console.error("Load orders error:", err);
+    bodyEl.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:1.5rem;">Connection error: ${err.message}</td></tr>`;
   }
 }
+
 
 
 async function loadMenu() {
