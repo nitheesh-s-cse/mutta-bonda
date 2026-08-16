@@ -45,15 +45,17 @@
 
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Recent Orders</h3>
-    <table>
-      <thead><tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
-      <tbody id="ordersBody"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table>
+        <thead><tr><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Add Menu Item</h3>
-    <form id="menuForm" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:end;">
+    <form id="menuForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;align-items:end;">
       <label>Name<input type="text" name="name" required></label>
       <label>Price (₹)<input type="number" name="price" required min="0"></label>
       <label>Category
@@ -68,12 +70,15 @@
 
   <div class="admin-card">
     <h3 style="margin-bottom:1rem;">Menu Items</h3>
-    <table>
-      <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th></th></tr></thead>
-      <tbody id="menuBody"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table>
+        <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Available</th><th></th></tr></thead>
+        <tbody id="menuBody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
+
 
 <!-- Set this to your deployed backend URL (e.g. https://mutta-bonda-shop-api.onrender.com/api) -->
 <script>window.API_BASE = localStorage.getItem("vb_api_base") || window.API_BASE || "https://mutta-bonda.onrender.com/api";</script>

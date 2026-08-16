@@ -365,20 +365,65 @@ input:focus,select:focus,textarea:focus{border-color:var(--ember);}
 .row--coupon{gap:.5rem;}
 .row--coupon input{flex:1;padding:.5rem .7rem;font-size:.8rem;}
 
-/* ---------- responsive ---------- */
+/* ---------- responsive & touch optimizations ---------- */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+.table-responsive table {
+  width: 100%;
+  min-width: 580px;
+}
+
 @media (max-width:960px){
   .special__card{grid-template-columns:1fr;}
   .combos__grid{grid-template-columns:1fr;}
   .contact__grid{grid-template-columns:1fr;}
-  .contact__map{grid-column:1/2;grid-row:auto;}
+  .contact__map{grid-column:1/2;grid-row:auto;min-height:280px;}
   .contact__form{grid-column:1/2;}
   .form-grid{grid-template-columns:1fr;}
   .form-grid--3{grid-template-columns:1fr;}
 }
 @media (max-width:780px){
-  .nav__links{position:fixed;top:64px;left:0;right:0;background:var(--charcoal-2);flex-direction:column;padding:1.5rem;gap:1.2rem;
-    transform:translateY(-130%);transition:transform .4s var(--ease);border-bottom:1px solid rgba(200,151,63,.2);}
+  body{font-size:.95rem;}
+  .nav__inner{padding:.75rem 1rem;}
+  .brand__text{font-size:.95rem;}
+  .brand__text em{font-size:.62rem;}
+  .nav__links{position:fixed;top:60px;left:0;right:0;background:var(--charcoal-2);flex-direction:column;padding:1.5rem;gap:1.2rem;
+    transform:translateY(-140%);transition:transform .4s var(--ease);border-bottom:1px solid rgba(200,151,63,.2);box-shadow:0 10px 30px rgba(0,0,0,.6);}
   .nav__links.is-open{transform:translateY(0);}
-  .hamburger{display:flex;}
+  .hamburger{display:flex;cursor:pointer;}
   .gallery__grid{column-count:1;}
+
+  .hero{padding:6.5rem 1rem 3rem;}
+  .hero__title{font-size:clamp(2.1rem,8.5vw,3.2rem);}
+  .hero__sub{font-size:.95rem;}
+  .hero__actions{flex-direction:column;width:100%;max-width:320px;margin:2rem auto 0;}
+  .hero__actions .btn{width:100%;}
+
+  .filter-chips{
+    justify-content:flex-start;
+    overflow-x:auto;
+    flex-wrap:nowrap;
+    -webkit-overflow-scrolling:touch;
+    width:100%;
+    padding-bottom:.5rem;
+  }
+  .chip{flex-shrink:0;white-space:nowrap;}
+
+  .special,.menu,.combos,.gallery,.reviews,.feedback,.contact{
+    padding:3.5rem 1rem;
+  }
+
+  .cart-drawer{width:100vw;}
 }
+
+@media (max-width:480px){
+  .admin-card{padding:1rem;border-radius:var(--radius);}
+  .top-bar{flex-direction:column;align-items:flex-start;gap:.8rem;}
+  .btn--full{width:100%;margin:0 0 1rem;}
+  .feedback-form{padding:1.2rem;border-radius:var(--radius);}
+}
+
