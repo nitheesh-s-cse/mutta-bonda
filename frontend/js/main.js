@@ -314,7 +314,7 @@ document.getElementById("applyCoupon").addEventListener("click", () => {
   renderCart();
 });
 
-document.getElementById("checkoutBtn").addEventListener("click", () => {
+document.getElementById("checkoutBtn").addEventListener("click", async () => {
   if (cart.length === 0) {
     alert("Your cart is empty — add an item first.");
     return;
@@ -334,12 +334,37 @@ document.getElementById("checkoutBtn").addEventListener("click", () => {
   const lines = cart.map((i) => `- ${i.name} x${i.qty} = ₹${i.price * i.qty}`).join("\n");
   const message = `*New Order — Vijaykumar's Mutta Bonda Shop*\n\nName: ${name}\nPhone: ${phone}\n\n${lines}\n\nSubtotal: ₹${subtotal}\nDelivery: ₹${delivery}\nDiscount: ₹${discountAmt}\n*Total: ₹${total}*\n\nAddress: ${address}\nPayment: ${payment}`;
 
-  // Sync order to backend (non-blocking — WhatsApp still opens even if this fails)
-  fetch(`${API_BASE}/orders`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ customerName: name, phone, address, paymentMethod: payment, items: cart, subtotal, delivery, discount: discountAmt, total }),
-  }).catch(() => {});
+  const payload = {
+    customer_name: name,
+    customerName: name,
+    phone,
+    address,
+    payment_method: payment,
+    paymentMethod: payment,
+    items: cart,
+    subtotal,
+    delivery,
+    discount: discountAmt,
+    total
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.ok) {
+      alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved and sent to Vijaykumar's Mutta Bonda Shop Admin.`);
+    } else {
+      console.warn("Order API response not OK:", await res.text());
+      alert(`🎉 Order Placed!\n\nThank you ${name}! Your order message has been prepared for WhatsApp.`);
+    }
+  } catch (err) {
+    console.warn("Could not sync order to API:", err);
+    alert(`🎉 Order Placed!\n\nThank you ${name}! Sending your order via WhatsApp.`);
+  }
 
   window.open(`https://wa.me/918610713970?text=${encodeURIComponent(message)}`, "_blank");
   cart = [];
@@ -348,6 +373,7 @@ document.getElementById("checkoutBtn").addEventListener("click", () => {
   renderCart();
   closeCart();
 });
+
 
 renderCart();
 

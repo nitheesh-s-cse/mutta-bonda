@@ -7,17 +7,35 @@ const router = express.Router();
 // POST /api/orders — public: customer places an order
 router.post("/", async (req, res) => {
   try {
+    const body = req.body;
+    const payload = {
+      customer_name: body.customer_name || body.customerName || "Customer",
+      phone: body.phone || "",
+      address: body.address || "",
+      payment_method: body.payment_method || body.paymentMethod || "Cash",
+      items: body.items || [],
+      subtotal: body.subtotal || 0,
+      delivery: body.delivery || 0,
+      discount: body.discount || 0,
+      total: body.total || 0,
+      status: body.status || "Pending"
+    };
+
     const { data, error } = await supabase
       .from("orders")
-      .insert([req.body])
+      .insert([payload])
       .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase order insert error:", error);
+      throw error;
+    }
     res.status(201).json(data[0]);
   } catch (err) {
     res.status(400).json({ message: "Could not place order.", error: err.message });
   }
 });
+
 
 // GET /api/orders — admin only: list orders (optional ?status=&search=)
 router.get("/", requireAdmin, async (req, res) => {
