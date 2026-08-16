@@ -356,15 +356,18 @@ document.getElementById("checkoutBtn").addEventListener("click", async () => {
     });
 
     if (res.ok) {
-      alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved and sent to Vijaykumar's Mutta Bonda Shop Admin.`);
+      alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved to the database and sent to Shop Admin.`);
     } else {
-      console.warn("Order API response not OK:", await res.text());
-      alert(`🎉 Order Placed!\n\nThank you ${name}! Your order message has been prepared for WhatsApp.`);
+      const errJson = await res.json().catch(() => ({}));
+      const msg = errJson.error || errJson.message || "Failed to save order to server";
+      console.warn("Order API error:", msg);
+      alert(`⚠️ Could not save order to Database: ${msg}\n\nRedirecting to WhatsApp...`);
     }
   } catch (err) {
     console.warn("Could not sync order to API:", err);
-    alert(`🎉 Order Placed!\n\nThank you ${name}! Sending your order via WhatsApp.`);
+    alert(`⚠️ Could not connect to API (${err.message}).\n\nRedirecting to WhatsApp...`);
   }
+
 
   window.open(`https://wa.me/918610713970?text=${encodeURIComponent(message)}`, "_blank");
   cart = [];

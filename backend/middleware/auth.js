@@ -9,12 +9,14 @@ function requireAdmin(req, res, next) {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "mutta-bonda-secret-key-123";
+    const decoded = jwt.verify(token, secret);
     req.admin = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Session expired or token invalid. Please log in again." });
   }
+
 }
 
 module.exports = { requireAdmin };
