@@ -300,7 +300,8 @@ async function loadMenu() {
           if (res.ok) {
             await loadMenu();
           } else {
-            alert("Could not update item status.");
+            const errData = await res.json().catch(() => ({}));
+            alert(`Could not update status: ${errData.error || errData.message || res.statusText}`);
             btn.disabled = false;
             btn.textContent = "Toggle Status";
           }
