@@ -1,13 +1,29 @@
+/**
+ * ============================================================================
+ * FEEDBACK ROUTES MODULE (/api/feedback)
+ * ============================================================================
+ * Description: Enables customers to submit visit reviews & ratings, and
+ *              allows admin to retrieve all feedback for CSV report export.
+ * ============================================================================
+ */
+
 const express = require("express");
 const supabase = require("../config/supabase");
 const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-// POST /api/feedback — public: customer submits feedback
+/**
+ * ----------------------------------------------------------------------------
+ * 1. POST /api/feedback (Public Access)
+ * ----------------------------------------------------------------------------
+ * Purpose: Customer feedback form submission.
+ */
 router.post("/", async (req, res) => {
   try {
     const b = req.body;
+    
+    // Construct feedback database record payload
     const payload = {
       name: b.name || "",
       phone: b.phone || "",
@@ -36,8 +52,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-
-// GET /api/feedback — admin only: view all feedback (for reports / CSV export)
+/**
+ * ----------------------------------------------------------------------------
+ * 2. GET /api/feedback (Admin Only)
+ * ----------------------------------------------------------------------------
+ * Purpose: Retrieves all feedback submissions for admin dashboard & CSV export.
+ */
 router.get("/", requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -53,4 +73,5 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
 

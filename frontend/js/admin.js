@@ -1,3 +1,13 @@
+/**
+ * ============================================================================
+ * VIJAYKUMAR'S MUTTA BONDA SHOP — ADMIN DASHBOARD JAVASCRIPT
+ * ============================================================================
+ * Description: Manages Admin Login, JWT Token Storage, Real-time Order Tracking,
+ *              Menu Management, Analytics Data Rendering, and CSV Exports.
+ * ============================================================================
+ */
+
+// Dynamically determine backend REST API base URL (Local vs Render Production)
 let API_BASE =
   localStorage.getItem("vb_api_base") ||
   window.API_BASE ||
@@ -7,18 +17,30 @@ let API_BASE =
     ? "http://localhost:5000/api"
     : "https://mutta-bonda.onrender.com/api");
 
+// LocalStorage key for storing JWT authorization token
 const TOKEN_KEY = "vb_admin_token";
 
+// DOM View container elements
 const loginView = document.getElementById("loginView");
 const dashView = document.getElementById("dashView");
 
+/**
+ * Retrieves stored JWT token from localStorage.
+ */
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
+
+/**
+ * Helper: Constructs HTTP Authorization headers with JWT token.
+ */
 function authHeaders() {
   return { Authorization: `Bearer ${getToken()}`, "Content-Type": "application/json" };
 }
 
+/**
+ * Prompt dialog helper to change API backend URL manually if needed.
+ */
 function promptForApiBase() {
   const current = localStorage.getItem("vb_api_base") || window.API_BASE || "";
   const input = prompt("Enter your Render Backend API URL (e.g., https://mutta-bonda-shop-api.onrender.com/api):", current);
@@ -30,6 +52,10 @@ function promptForApiBase() {
   }
 }
 
+/**
+ * Dashboard Initialization Handler
+ * Checks for existing admin JWT session on page load.
+ */
 async function init() {
   if (getToken()) {
     loginView.style.display = "none";
@@ -37,6 +63,7 @@ async function init() {
     await loadDashboard();
   }
 }
+
 
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();

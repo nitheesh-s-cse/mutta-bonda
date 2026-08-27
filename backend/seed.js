@@ -1,9 +1,18 @@
-/* Run with: npm run seed or called automatically on server startup.
-   Populates Supabase database with the starting menu and one admin account. */
+/**
+ * ============================================================================
+ * DATABASE SEEDING MODULE (seed.js)
+ * ============================================================================
+ * Description: Populates the database with initial food menu items and
+ *              creates default administrative login credentials on first run.
+ * Usage: Run via `npm run seed` or called automatically on server startup.
+ * ============================================================================
+ */
+
 require("dotenv").config();
 const bcrypt = require("bcryptjs");
 const supabase = require("./config/supabase");
 
+// Default food menu dataset
 const menu = [
   { name: "Chicken Mutta Bonda", price: 60, category: "Special Bonda", is_todays_special: true, tag: "Best Seller" },
   { name: "Kaara Bonda", price: 20, category: "Veg Bonda" },
@@ -34,12 +43,15 @@ const menu = [
   { name: "Family Bonda Combo (Free Coke + Cupcake)", price: 200, category: "Combo" },
 ];
 
+/**
+ * Automatically seeds the database if empty.
+ */
 async function autoSeed() {
   try {
     const email = (process.env.ADMIN_EMAIL || "nitheeshsmart4316@gmail.com").toLowerCase();
     const password = process.env.ADMIN_PASSWORD || "sollamaaten";
 
-    // Check if admin users table has admin
+    // 1. Check if admin accounts already exist
     const { data: existingAdmin, error: adminQueryErr } = await supabase
       .from("admin_users")
       .select("*")
@@ -50,34 +62,38 @@ async function autoSeed() {
       return;
     }
 
+    // 2. Create default admin account if table is unpopulated
     if (!existingAdmin || existingAdmin.length === 0) {
-      console.log("No admin found. Auto-seeding initial database data...");
+      console.log("🌱 No admin user found. Auto-seeding initial database data...");
       const password_hash = await bcrypt.hash(password, 10);
       const { error: adminInsertErr } = await supabase
         .from("admin_users")
         .insert([{ email, password_hash }]);
 
       if (!adminInsertErr) {
-        console.log(`Created default admin account for ${email}`);
+        console.log(`✅ Created default admin account for ${email}`);
       }
 
+      // 3. Seed menu items if menu table is empty
       const { data: existingMenu } = await supabase.from("menu_items").select("id").limit(1);
       if (!existingMenu || existingMenu.length === 0) {
         const { data: insertedMenu } = await supabase.from("menu_items").insert(menu).select();
         if (insertedMenu) {
-          console.log(`Inserted ${insertedMenu.length} initial menu items.`);
+          console.log(`✅ Inserted ${insertedMenu.length} initial menu items.`);
         }
       }
     }
   } catch (err) {
-    console.error("Auto-seed failed:", err.message);
+    console.error("❌ Auto-seed failed:", err.message);
   }
 }
 
+// Execute directly if run as CLI script
 if (require.main === module) {
   autoSeed().then(() => process.exit(0));
 }
 
 module.exports = { autoSeed };
+
 
 

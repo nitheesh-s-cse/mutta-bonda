@@ -1,48 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Vijaykumar's Mutta Bonda Shop</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<style>
-  body{padding:2rem 1.5rem;max-width:1100px;margin:0 auto;}
-  .admin-card{background:var(--charcoal-2);border:1px solid rgba(200,151,63,.18);border-radius:var(--radius-lg);padding:1.8rem;margin-bottom:1.6rem;}
-  .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.6rem;}
-  .stat{background:var(--charcoal-2);border:1px solid rgba(200,151,63,.16);border-radius:var(--radius);padding:1.2rem;}
-  .stat span{display:block;font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;color:var(--gold-light);margin-bottom:.4rem;}
-  .stat strong{font-size:1.4rem;}
-  table{width:100%;border-collapse:collapse;font-size:.85rem;}
-  th,td{text-align:left;padding:.6rem .5rem;border-bottom:1px solid rgba(200,151,63,.12);}
-  th{color:var(--gold-light);font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;}
-  select, input[type="text"], input[type="number"], input[type="file"]{padding:.4rem .6rem;font-size:.82rem;background:var(--charcoal-3);border:1px solid rgba(200,151,63,.25);color:var(--cream);border-radius:6px;}
-  #loginView{max-width:380px;margin:4rem auto;}
-  #dashView{display:none;}
-  .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6rem;}
-  .status-pill{padding:.25rem .65rem;border-radius:100px;font-size:.72rem;font-family:var(--font-mono);font-weight:600;display:inline-block;}
-  .status-pill--active{background:rgba(46,204,113,.15);color:#2ecc71;border:1px solid rgba(46,204,113,.4);}
-  .status-pill--disabled{background:rgba(224,72,60,.15);color:#e0483c;border:1px solid rgba(224,72,60,.4);}
-  .img-picker-box{display:flex;flex-direction:column;gap:0.4rem;background:rgba(0,0,0,0.2);padding:0.6rem;border-radius:8px;border:1px dashed rgba(200,151,63,.25);}
-</style>
+  <!-- ============================================================================
+       VIJAYKUMAR'S MUTTA BONDA SHOP — ADMIN DASHBOARD PORTAL (admin.html)
+       ============================================================================
+       Description: Administrative interface for Shop Management including:
+                    1. Secure Admin Login Form (JWT Token Authentication)
+                    2. Sales Analytics Stats Grid (Daily/Monthly Revenue)
+                    3. Real-time Customer Orders Management & Status Updates
+                    4. Menu Item Editor (Add/Edit Prices, Stock, Upload Images)
+                    5. Customer Reviews & Feedback CSV Exporter
+       ============================================================================ -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Vijaykumar's Mutta Bonda Shop</title>
+  
+  <!-- Typography & Stylesheets -->
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Dashboard Specific Styling Override -->
+  <style>
+    body { padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+    .admin-card { background: var(--charcoal-2); border: 1px solid rgba(200,151,63,.18); border-radius: var(--radius-lg); padding: 1.8rem; margin-bottom: 1.6rem; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.6rem; }
+    .stat { background: var(--charcoal-2); border: 1px solid rgba(200,151,63,.16); border-radius: var(--radius); padding: 1.2rem; }
+    .stat span { display: block; font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; color: var(--gold-light); margin-bottom: .4rem; }
+    .stat strong { font-size: 1.4rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid rgba(200,151,63,.12); }
+    th { color: var(--gold-light); font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; }
+    select, input[type="text"], input[type="number"], input[type="file"] { padding: .4rem .6rem; font-size: .82rem; background: var(--charcoal-3); border: 1px solid rgba(200,151,63,.25); color: var(--cream); border-radius: 6px; }
+    #loginView { max-width: 380px; margin: 4rem auto; }
+    #dashView { display: none; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.6rem; }
+    .status-pill { padding: .25rem .65rem; border-radius: 100px; font-size: .72rem; font-family: var(--font-mono); font-weight: 600; display: inline-block; }
+    .status-pill--active { background: rgba(46,204,113,.15); color: #2ecc71; border: 1px solid rgba(46,204,113,.4); }
+    .status-pill--disabled { background: rgba(224,72,60,.15); color: #e0483c; border: 1px solid rgba(224,72,60,.4); }
+    .img-picker-box { display: flex; flex-direction: column; gap: 0.4rem; background: rgba(0,0,0,0.2); padding: 0.6rem; border-radius: 8px; border: 1px dashed rgba(200,151,63,.25); }
+  </style>
 </head>
 <body>
 
-<div id="loginView" class="admin-card">
-  <h2 style="margin-bottom:1rem;">Admin Login</h2>
-  <form id="loginForm" style="display:flex;flex-direction:column;gap:1rem;">
-    <label>Email<input type="email" name="email" required></label>
-    <label>Password<input type="password" name="password" required></label>
-    <button class="btn btn--primary" type="submit">Log In</button>
-    <p id="loginError" style="color:var(--danger);font-size:.82rem;" hidden></p>
-  </form>
-</div>
-
-<div id="dashView">
-  <div class="top-bar">
-    <h1 style="font-size:1.6rem;">Shop Dashboard</h1>
-    <button class="btn btn--ghost btn--sm" id="logoutBtn">Log Out</button>
+  <!-- ============================================================================
+       1. SECURE LOGIN VIEW PANEL (Shown before JWT Token authentication)
+       ============================================================================ -->
+  <div id="loginView" class="admin-card">
+    <h2 style="margin-bottom:1rem;">Admin Login</h2>
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:1rem;">
+      <label>Email<input type="email" name="email" required></label>
+      <label>Password<input type="password" name="password" required></label>
+      <button class="btn btn--primary" type="submit">Log In</button>
+      <p id="loginError" style="color:var(--danger);font-size:.82rem;" hidden></p>
+    </form>
   </div>
+
+  <!-- ============================================================================
+       2. MAIN ADMIN DASHBOARD VIEW (Shown after successful login)
+       ============================================================================ -->
+  <div id="dashView">
+    <div class="top-bar">
+      <h1 style="font-size:1.6rem;">Shop Dashboard</h1>
+      <button class="btn btn--ghost btn--sm" id="logoutBtn">Log Out</button>
+    </div>
+
 
   <div class="admin-grid" id="statsGrid"></div>
 

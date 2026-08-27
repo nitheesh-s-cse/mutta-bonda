@@ -1,10 +1,23 @@
+/**
+ * ============================================================================
+ * CONTACT ROUTES MODULE (/api/contact)
+ * ============================================================================
+ * Description: Public contact message submission and admin message listing.
+ * ============================================================================
+ */
+
 const express = require("express");
 const supabase = require("../config/supabase");
 const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-// POST /api/contact — public: visitor sends a message
+/**
+ * ----------------------------------------------------------------------------
+ * 1. POST /api/contact (Public Access)
+ * ----------------------------------------------------------------------------
+ * Purpose: Visitor contact form message submission.
+ */
 router.post("/", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -19,7 +32,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET /api/contact — admin only
+/**
+ * ----------------------------------------------------------------------------
+ * 2. GET /api/contact (Admin Only)
+ * ----------------------------------------------------------------------------
+ * Purpose: Retrieves all received contact messages for Admin view.
+ */
 router.get("/", requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -35,4 +53,5 @@ router.get("/", requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
 

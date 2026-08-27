@@ -1,14 +1,30 @@
+/**
+ * ============================================================================
+ * MENU ROUTES MODULE (/api/menu)
+ * ============================================================================
+ * Description: Endpoints for listing food items, getting today's special,
+ *              adding new menu items, updating prices/availability, and deleting items.
+ * ============================================================================
+ */
+
 const express = require("express");
 const supabase = require("../config/supabase");
 const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-// GET /api/menu — public: list all items (optional ?category=)
+/**
+ * ----------------------------------------------------------------------------
+ * 1. GET /api/menu (Public Access)
+ * ----------------------------------------------------------------------------
+ * Purpose: Retrieves all menu items for customer display.
+ * Optional Query Params: ?category=Veg Bonda
+ */
 router.get("/", async (req, res) => {
   try {
     let query = supabase.from("menu_items").select("*").order("id", { ascending: true });
 
+    // Filter menu items by category if requested
     if (req.query.category) {
       query = query.eq("category", req.query.category);
     }
@@ -21,7 +37,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/menu/special — public: today's featured item
+/**
+ * ----------------------------------------------------------------------------
+ * 2. GET /api/menu/special (Public Access)
+ * ----------------------------------------------------------------------------
+ * Purpose: Fetches the item marked as Today's Special for hero banner display.
+ */
 router.get("/special", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -37,7 +58,12 @@ router.get("/special", async (req, res) => {
   }
 });
 
-// POST /api/menu — admin only: add item
+/**
+ * ----------------------------------------------------------------------------
+ * 3. POST /api/menu (Admin Only)
+ * ----------------------------------------------------------------------------
+ * Purpose: Adds a new menu item to the database.
+ */
 router.post("/", requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -52,12 +78,19 @@ router.post("/", requireAdmin, async (req, res) => {
   }
 });
 
-// PUT /api/menu/:id — admin only: edit item (price, availability, image, etc.)
+/**
+ * ----------------------------------------------------------------------------
+ * 4. PUT /api/menu/:id (Admin Only)
+ * ----------------------------------------------------------------------------
+ * Purpose: Edits an existing menu item (price, stock availability, category, image).
+ * Fallback: Creates the item if it does not exist (upsert behavior).
+ */
 router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const rawId = req.params.id;
     const targetId = isNaN(rawId) ? rawId : Number(rawId);
 
+    // Primary update query by numeric ID
     let { data, error } = await supabase
       .from("menu_items")
       .update(req.body)
@@ -66,6 +99,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
 
     if (error) throw error;
 
+    // Retry update query by string ID if initial match yielded no rows
     if (!data || data.length === 0) {
       let { data: retryData, error: retryErr } = await supabase
         .from("menu_items")
@@ -77,6 +111,7 @@ router.put("/:id", requireAdmin, async (req, res) => {
       data = retryData;
     }
 
+    // Auto-create item payload if item wasn't existing
     if (!data || data.length === 0) {
       const newItemPayload = {
         id: targetId,
@@ -102,7 +137,12 @@ router.put("/:id", requireAdmin, async (req, res) => {
   }
 });
 
-// DELETE /api/menu/:id — admin only
+/**
+ * ----------------------------------------------------------------------------
+ * 5. DELETE /api/menu/:id (Admin Only)
+ * ----------------------------------------------------------------------------
+ * Purpose: Removes a menu item from the database.
+ */
 router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -113,6 +153,7 @@ router.delete("/:id", requireAdmin, async (req, res) => {
 
     if (error) throw error;
     if (!data || data.length === 0) return res.status(404).json({ message: "Menu item not found." });
+    
     res.json({ message: "Menu item deleted." });
   } catch (err) {
     res.status(500).json({ message: "Could not delete menu item.", error: err.message });

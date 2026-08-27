@@ -443,6 +443,57 @@ document.getElementById("applyCoupon")?.addEventListener("click", () => {
   renderCart();
 });
 
+/* ---------------- MEDIUM-SIZED ORDER CONFIRMED MODAL ---------------- */
+const orderModalOverlay = document.getElementById("orderModalOverlay");
+const orderModalCloseBtn = document.getElementById("orderModalCloseBtn");
+const modalCloseActionBtn = document.getElementById("modalCloseActionBtn");
+
+/**
+ * Displays the medium-sized Order Confirmed popup modal with order details.
+ */
+function openOrderModal(data) {
+  const { name, phone, cartItems, total, whatsappMessage } = data;
+  
+  const nameEl = document.getElementById("modalCustomerName");
+  const phoneEl = document.getElementById("modalCustomerPhone");
+  const itemsEl = document.getElementById("modalOrderItems");
+  const totalEl = document.getElementById("modalOrderTotal");
+  const waBtn = document.getElementById("modalWhatsappBtn");
+
+  if (nameEl) nameEl.textContent = name;
+  if (phoneEl) phoneEl.textContent = phone;
+  if (totalEl) totalEl.textContent = `₹${total}`;
+  
+  if (itemsEl && Array.isArray(cartItems)) {
+    itemsEl.innerHTML = cartItems.map(i => `<div>${i.name} × ${i.qty} (₹${i.price * i.qty})</div>`).join("");
+  }
+
+  if (waBtn && whatsappMessage) {
+    waBtn.href = `https://wa.me/918610713970?text=${encodeURIComponent(whatsappMessage)}`;
+  }
+
+  if (orderModalOverlay) {
+    orderModalOverlay.classList.add("is-open");
+  }
+}
+
+/**
+ * Closes the Order Confirmed popup modal.
+ */
+function closeOrderModal() {
+  if (orderModalOverlay) {
+    orderModalOverlay.classList.remove("is-open");
+  }
+}
+
+if (orderModalCloseBtn) orderModalCloseBtn.addEventListener("click", closeOrderModal);
+if (modalCloseActionBtn) modalCloseActionBtn.addEventListener("click", closeOrderModal);
+if (orderModalOverlay) {
+  orderModalOverlay.addEventListener("click", (e) => {
+    if (e.target === orderModalOverlay) closeOrderModal();
+  });
+}
+
 if (checkoutForm) {
   checkoutForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -490,20 +541,24 @@ if (checkoutForm) {
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
-        alert(`🎉 Order Confirmed!\n\nThank you ${name}! Your order (₹${total}) has been saved and sent to Shop Admin.`);
-      } else {
+      if (!res.ok) {
         const errJson = await res.json().catch(() => ({}));
-        const msg = errJson.error || errJson.message || "Failed to save order to server";
-        console.warn("Order API warning:", msg);
-        alert(`⚠️ Order logged locally. Redirecting to WhatsApp...`);
+        console.warn("Order API warning:", errJson.error || errJson.message);
       }
     } catch (err) {
-      console.warn("Could not sync order to API:", err);
-      alert(`⚠️ Connecting to WhatsApp...`);
+      console.warn("Could not sync order to API server:", err);
     }
 
-    window.open(`https://wa.me/918610713970?text=${encodeURIComponent(message)}`, "_blank");
+    // Trigger Medium Size Order Confirmed Popup Modal
+    openOrderModal({
+      name,
+      phone,
+      cartItems: [...cart],
+      total,
+      whatsappMessage: message
+    });
+
+    // Reset Cart & Close Drawer
     cart = [];
     appliedDiscount = 0;
     saveCart();
@@ -513,6 +568,7 @@ if (checkoutForm) {
 }
 
 renderCart();
+
 
 /* ---------------- FEEDBACK FORM ---------------- */
 document.getElementById("feedbackForm")?.addEventListener("submit", async (e) => {
